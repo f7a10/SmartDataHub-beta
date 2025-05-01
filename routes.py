@@ -514,7 +514,6 @@ def generate_dashboard_data_from_files(processed_data, file_paths, session_id):
                     {"id": "pie_chart", "name": "Pie Chart", "icon": "chart-pie"},
                     {"id": "histogram", "name": "Histogram", "icon": "chart-column"},
                     {"id": "scatter_plot", "name": "Scatter Plot", "icon": "circle-dot"},
-                    {"id": "heatmap", "name": "Correlation Heatmap", "icon": "th"},
                     {"id": "box_plot", "name": "Box Plot", "icon": "chart-boxplot"},
                     {"id": "radar_chart", "name": "Radar Chart", "icon": "spider"},
                     {"id": "bubble_chart", "name": "Bubble Chart", "icon": "circle"}

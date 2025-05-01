@@ -1,0 +1,101 @@
+TransactionID,TransactionDate,CustomerName,Product,Category,Region,Quantity,TotalCost,PricePerUnit,TotalPrice,NetRevenue
+TXN1001,2024-02-01,David King,Desk Lamp,Electronics,West,2,1748,413,826,-922
+TXN1002,2024-02-02,Alice Brown,Smartphone,Furniture,North,1,429,593,593,164
+TXN1003,2024-02-03,Emma Scott,Laptop,Furniture,West,8,1618,880,7040,5422
+TXN1004,2024-02-04,Bob Wilson,Printer,Electronics,North,1,1006,535,535,-471
+TXN1005,2024-02-05,David King,Office Chair,Electronics,South,9,740,396,3564,2824
+TXN1006,2024-02-06,Grace Miller,Desk Lamp,Furniture,North,6,1500,173,1038,-462
+TXN1007,2024-02-07,Mark Taylor,Office Chair,Electronics,West,7,1686,914,6398,4712
+TXN1008,2024-02-08,David King,Office Chair,Furniture,West,7,1341,98,686,-655
+TXN1009,2024-02-09,Emma Scott,Laptop,Furniture,West,3,1908,128,384,-1524
+TXN1010,2024-02-10,Bob Wilson,Office Chair,Electronics,West,2,1650,425,850,-800
+TXN1011,2024-02-11,Alice Brown,Printer,Electronics,West,9,1490,54,486,-1004
+TXN1012,2024-02-12,Emma Scott,Office Chair,Furniture,East,8,1241,977,7816,6575
+TXN1013,2024-02-13,Emma Scott,Laptop,Furniture,East,7,1915,920,6440,4525
+TXN1014,2024-02-14,Mark Taylor,Printer,Electronics,North,9,1116,498,4482,3366
+TXN1015,2024-02-15,Carol Lee,Smartphone,Furniture,West,4,1629,513,2052,423
+TXN1016,2024-02-16,Bob Wilson,Office Chair,Electronics,North,4,334,594,2376,2042
+TXN1017,2024-02-17,Jane Smith,Laptop,Furniture,West,1,446,180,180,-266
+TXN1018,2024-02-18,Emma Scott,Smartphone,Electronics,West,8,61,173,1384,1323
+TXN1019,2024-02-19,Carol Lee,Smartphone,Electronics,East,3,1680,598,1794,114
+TXN1020,2024-02-20,Jane Smith,Desk Lamp,Electronics,East,7,1375,68,476,-899
+TXN1021,2024-02-21,Bob Wilson,Printer,Furniture,South,2,1971,138,276,-1695
+TXN1022,2024-02-22,John Doe,Office Chair,Furniture,East,2,1326,722,1444,118
+TXN1023,2024-02-23,Grace Miller,Laptop,Electronics,South,7,548,71,497,-51
+TXN1024,2024-02-24,Carol Lee,Desk Lamp,Furniture,South,6,803,215,1290,487
+TXN1025,2024-02-25,Frank Hall,Printer,Electronics,South,3,84,964,2892,2808
+TXN1026,2024-02-26,John Doe,Desk Lamp,Electronics,South,9,776,427,3843,3067
+TXN1027,2024-02-27,Grace Miller,Printer,Furniture,South,6,898,252,1512,614
+TXN1028,2024-02-28,Mark Taylor,Printer,Furniture,North,6,139,663,3978,3839
+TXN1029,2024-02-29,David King,Office Chair,Electronics,East,1,825,162,162,-663
+TXN1030,2024-03-01,Alice Brown,Printer,Furniture,South,4,654,192,768,114
+TXN1031,2024-03-02,Frank Hall,Desk Lamp,Furniture,West,6,1995,244,1464,-531
+TXN1032,2024-03-03,Mark Taylor,Printer,Electronics,East,6,1019,762,4572,3553
+TXN1033,2024-03-04,Bob Wilson,Office Chair,Electronics,East,5,1675,264,1320,-355
+TXN1034,2024-03-05,Mark Taylor,Office Chair,Furniture,South,1,1071,872,872,-199
+TXN1035,2024-03-06,David King,Desk Lamp,Electronics,North,8,467,687,5496,5029
+TXN1036,2024-03-07,Bob Wilson,Smartphone,Electronics,South,5,164,780,3900,3736
+TXN1037,2024-03-08,Frank Hall,Smartphone,Furniture,North,5,666,617,3085,2419
+TXN1038,2024-03-09,David King,Printer,Electronics,West,7,1976,38,266,-1710
+TXN1039,2024-03-10,Jane Smith,Laptop,Electronics,East,4,1269,103,412,-857
+TXN1040,2024-03-11,Alice Brown,Printer,Furniture,West,6,875,983,5898,5023
+TXN1041,2024-03-12,Frank Hall,Desk Lamp,Furniture,North,4,1574,521,2084,510
+TXN1042,2024-03-13,Jane Smith,Desk Lamp,Electronics,North,3,1699,942,2826,1127
+TXN1043,2024-03-14,Grace Miller,Desk Lamp,Electronics,West,7,1566,282,1974,408
+TXN1044,2024-03-15,Frank Hall,Desk Lamp,Furniture,North,8,1148,259,2072,924
+TXN1045,2024-03-16,Grace Miller,Desk Lamp,Furniture,West,4,462,548,2192,1730
+TXN1046,2024-03-17,Bob Wilson,Office Chair,Furniture,East,2,1449,203,406,-1043
+TXN1047,2024-03-18,Jane Smith,Smartphone,Furniture,West,3,1493,682,2046,553
+TXN1048,2024-03-19,Alice Brown,Desk Lamp,Electronics,East,1,778,197,197,-581
+TXN1049,2024-03-20,David King,Laptop,Furniture,West,8,1350,199,1592,242
+TXN1050,2024-03-21,Emma Scott,Laptop,Furniture,North,3,1070,422,1266,196
+TXN1051,2024-03-22,Mark Taylor,Laptop,Electronics,West,7,810,975,6825,6015
+TXN1052,2024-03-23,John Doe,Laptop,Furniture,North,5,725,824,4120,3395
+TXN1053,2024-03-24,Alice Brown,Office Chair,Electronics,West,5,1467,663,3315,1848
+TXN1054,2024-03-25,Jane Smith,Laptop,Furniture,West,7,1942,223,1561,-381
+TXN1055,2024-03-26,Emma Scott,Desk Lamp,Furniture,South,9,506,546,4914,4408
+TXN1056,2024-03-27,Alice Brown,Printer,Furniture,North,5,969,58,290,-679
+TXN1057,2024-03-28,Jane Smith,Laptop,Electronics,South,1,241,194,194,-47
+TXN1058,2024-03-29,Carol Lee,Office Chair,Electronics,North,1,788,451,451,-337
+TXN1059,2024-03-30,Carol Lee,Office Chair,Furniture,South,2,1762,368,736,-1026
+TXN1060,2024-03-31,Grace Miller,Laptop,Electronics,East,6,1172,677,4062,2890
+TXN1061,2024-04-01,Alice Brown,Printer,Electronics,West,9,1621,525,4725,3104
+TXN1062,2024-04-02,Carol Lee,Laptop,Electronics,North,8,1027,394,3152,2125
+TXN1063,2024-04-03,Jane Smith,Office Chair,Electronics,North,5,1058,862,4310,3252
+TXN1064,2024-04-04,Grace Miller,Smartphone,Electronics,West,1,145,371,371,226
+TXN1065,2024-04-05,Jane Smith,Desk Lamp,Electronics,North,7,1737,529,3703,1966
+TXN1066,2024-04-06,Grace Miller,Office Chair,Furniture,North,5,712,686,3430,2718
+TXN1067,2024-04-07,Alice Brown,Laptop,Furniture,South,6,1263,540,3240,1977
+TXN1068,2024-04-08,Emma Scott,Desk Lamp,Electronics,North,7,1809,356,2492,683
+TXN1069,2024-04-09,David King,Laptop,Furniture,East,3,86,246,738,652
+TXN1070,2024-04-10,Frank Hall,Laptop,Furniture,East,3,1853,330,990,-863
+TXN1071,2024-04-11,Emma Scott,Smartphone,Furniture,West,5,1442,161,805,-637
+TXN1072,2024-04-12,Bob Wilson,Desk Lamp,Furniture,North,6,1768,833,4998,3230
+TXN1073,2024-04-13,Jane Smith,Desk Lamp,Electronics,West,9,1598,99,891,-707
+TXN1074,2024-04-14,Bob Wilson,Smartphone,Furniture,East,5,328,281,1405,1077
+TXN1075,2024-04-15,Emma Scott,Office Chair,Furniture,North,1,266,444,444,178
+TXN1076,2024-04-16,Grace Miller,Laptop,Electronics,North,4,916,816,3264,2348
+TXN1077,2024-04-17,Frank Hall,Printer,Electronics,West,5,922,474,2370,1448
+TXN1078,2024-04-18,Frank Hall,Laptop,Furniture,East,5,1871,905,4525,2654
+TXN1079,2024-04-19,John Doe,Laptop,Furniture,North,7,1346,211,1477,131
+TXN1080,2024-04-20,Frank Hall,Office Chair,Furniture,West,4,1954,196,784,-1170
+TXN1081,2024-04-21,David King,Laptop,Furniture,East,1,111,120,120,9
+TXN1082,2024-04-22,Frank Hall,Smartphone,Furniture,West,5,645,743,3715,3070
+TXN1083,2024-04-23,Emma Scott,Smartphone,Furniture,South,7,1953,887,6209,4256
+TXN1084,2024-04-24,John Doe,Desk Lamp,Electronics,North,6,778,560,3360,2582
+TXN1085,2024-04-25,Emma Scott,Printer,Furniture,South,5,1415,68,340,-1075
+TXN1086,2024-04-26,Emma Scott,Laptop,Furniture,East,4,446,155,620,174
+TXN1087,2024-04-27,Mark Taylor,Laptop,Electronics,South,2,748,480,960,212
+TXN1088,2024-04-28,John Doe,Office Chair,Electronics,South,4,1092,202,808,-284
+TXN1089,2024-04-29,Emma Scott,Smartphone,Electronics,East,3,226,682,2046,1820
+TXN1090,2024-04-30,Mark Taylor,Printer,Electronics,West,1,1685,783,783,-902
+TXN1091,2024-05-01,Mark Taylor,Desk Lamp,Furniture,South,8,445,249,1992,1547
+TXN1092,2024-05-02,John Doe,Smartphone,Furniture,West,5,494,667,3335,2841
+TXN1093,2024-05-03,Bob Wilson,Desk Lamp,Furniture,South,4,1306,87,348,-958
+TXN1094,2024-05-04,Grace Miller,Office Chair,Furniture,West,8,1988,689,5512,3524
+TXN1095,2024-05-05,David King,Office Chair,Furniture,East,7,125,505,3535,3410
+TXN1096,2024-05-06,Grace Miller,Laptop,Furniture,South,2,314,485,970,656
+TXN1097,2024-05-07,Frank Hall,Printer,Electronics,East,1,504,858,858,354
+TXN1098,2024-05-08,David King,Desk Lamp,Furniture,South,4,1869,924,3696,1827
+TXN1099,2024-05-09,Frank Hall,Smartphone,Electronics,East,8,767,390,3120,2353
+TXN1100,2024-05-10,Emma Scott,Office Chair,Electronics,East,2,784,964,1928,1144
