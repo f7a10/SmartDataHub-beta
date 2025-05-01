@@ -412,12 +412,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // Display analysis results
     function displayAnalysisResults(results) {
         try {
+            console.log('Displaying analysis results:', results);
+            
             // Show dashboard section
             dashboardSection.style.display = 'block';
             
-            // Display metrics
+            // Display metrics - with extra logging
             if (results.metrics) {
+                console.log('Metrics found in results:', results.metrics);
                 displayMetrics(results.metrics);
+            } else {
+                console.warn('No metrics found in analysis results');
+                // Use empty metrics as fallback
+                displayMetrics({
+                    file_count: results.files ? results.files.length : 0,
+                    total_rows: 'N/A',
+                    total_columns: 'N/A'
+                });
             }
             
             // Initialize chart options and data with careful error handling
@@ -456,8 +467,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 aiInsightsContent.textContent = "No AI insights available for this data.";
             }
             
-            // Scroll to dashboard section
-            dashboardSection.scrollIntoView({ behavior: 'smooth' });
+            // Safely scroll to dashboard section
+            try {
+                dashboardSection.scrollIntoView({ behavior: 'smooth' });
+            } catch (scrollError) {
+                console.warn('Smooth scrolling not supported:', scrollError);
+                try {
+                    // Fallback to standard scrollIntoView
+                    dashboardSection.scrollIntoView();
+                } catch (e) {
+                    console.error('Cannot scroll to dashboard section:', e);
+                }
+            }
         } catch (error) {
             console.error('Error displaying analysis results:', error);
             showNotification('Error displaying analysis results. Please try again.', 'error');
@@ -466,7 +487,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Display metrics
     function displayMetrics(metrics) {
-        if (!metrics) return;
+        console.log('Displaying metrics:', metrics);
+        if (!metrics) {
+            console.warn('No metrics provided to displayMetrics function');
+            return;
+        }
         
         metricsGrid.innerHTML = '';
         
@@ -480,6 +505,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Create metric cards
         metricDisplays.forEach(metric => {
             if (metrics[metric.key] !== undefined) {
+                console.log(`Creating metric card for ${metric.key}: ${metrics[metric.key]}`);
                 const card = document.createElement('div');
                 card.className = 'metric-card';
                 card.innerHTML = `
@@ -487,12 +513,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     <span class="metric-label">${metric.label}</span>
                 `;
                 metricsGrid.appendChild(card);
+            } else {
+                console.warn(`Metric ${metric.key} not found in provided metrics object`);
             }
         });
         
         // Add any additional metrics provided by the server
         for (const [key, value] of Object.entries(metrics)) {
             if (!metricDisplays.some(m => m.key === key) && key !== 'session_id') {
+                console.log(`Adding additional metric ${key}: ${value}`);
                 const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                 const card = document.createElement('div');
                 card.className = 'metric-card';
@@ -503,6 +532,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 metricsGrid.appendChild(card);
             }
         }
+        
+        // Store metrics in session data for reference
+        sessionData.metrics = { ...metrics };
     }
     
     // Load saved charts
