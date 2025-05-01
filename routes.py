@@ -369,9 +369,12 @@ def analyze_data():
         else:
             file_indices = file_indices_param
             
-        combine_files = data.get('combine_files', False)
-        if isinstance(combine_files, str):
-            combine_files = combine_files.lower() in ['true', '1', 'yes']
+        # Check for frontend 'combine' parameter and fall back to 'combine_files'
+        combine_param = data.get('combine', data.get('combine_files', False))
+        if isinstance(combine_param, str):
+            combine_files = combine_param.lower() in ['true', '1', 'yes']
+        else:
+            combine_files = bool(combine_param)
         
         logger.debug(f"Analysis parameters: file_indices={file_indices}, combine_files={combine_files}")
         

@@ -363,9 +363,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Fetch analysis results
-    async function fetchAnalysis(sessionId) {
+    async function fetchAnalysis(sessionId, fileIndices = [], combineFiles = false) {
         try {
-            const response = await fetch(`/analyze?session_id=${sessionId}`);
+            // Build URL with parameters
+            let url = `/analyze?session_id=${sessionId}`;
+            
+            // Add file indices if provided
+            if (fileIndices && fileIndices.length > 0) {
+                url += `&file_indices=${fileIndices.join(',')}`;
+            }
+            
+            // Add combine flag if true
+            if (combineFiles) {
+                url += '&combine=true';
+            }
+            
+            const response = await fetch(url);
             return await response.json();
         } catch (error) {
             console.error('Error fetching analysis:', error);
