@@ -788,15 +788,85 @@ class ChartManager {
         
         closeBtn.addEventListener('click', () => {
             modal.style.display = 'none';
+            // Clean up the modal chart
+            if (this.activeCharts['modal']) {
+                try {
+                    this.activeCharts['modal'].destroy();
+                } catch (error) {
+                    console.warn('Error destroying modal chart:', error);
+                }
+                delete this.activeCharts['modal'];
+            }
         });
         
         closeX.addEventListener('click', () => {
             modal.style.display = 'none';
+            // Clean up the modal chart
+            if (this.activeCharts['modal']) {
+                try {
+                    this.activeCharts['modal'].destroy();
+                } catch (error) {
+                    console.warn('Error destroying modal chart:', error);
+                }
+                delete this.activeCharts['modal'];
+            }
         });
         
         // Render chart in modal
+        // Need to create a special version for modal
         const canvas = document.getElementById('chart-modal');
-        this.renderChart(chartType, chartData);
+        const ctx = canvas.getContext('2d');
+
+        try {
+            // Clone chart data to avoid reference issues
+            const modalChartData = JSON.parse(JSON.stringify(chartData));
+            
+            // Create chart based on type
+            let chart;
+            if (chartType === 'bar_chart') {
+                chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: modalChartData,
+                    options: this.chartOptions.bar
+                });
+            } else if (chartType === 'line_chart') {
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: modalChartData,
+                    options: this.chartOptions.line
+                });
+            } else if (chartType === 'pie_chart') {
+                chart = new Chart(ctx, {
+                    type: 'pie',
+                    data: modalChartData,
+                    options: this.chartOptions.pie
+                });
+            } else if (chartType === 'scatter_plot') {
+                chart = new Chart(ctx, {
+                    type: 'scatter',
+                    data: modalChartData,
+                    options: this.chartOptions.scatter
+                });
+            } else if (chartType === 'radar_chart') {
+                chart = new Chart(ctx, {
+                    type: 'radar',
+                    data: modalChartData,
+                    options: this.chartOptions.radar
+                });
+            } else if (chartType === 'bubble_chart') {
+                chart = new Chart(ctx, {
+                    type: 'bubble',
+                    data: modalChartData,
+                    options: this.chartOptions.bubble
+                });
+            } else {
+                console.error('Unsupported chart type for modal view:', chartType);
+            }
+            
+            this.activeCharts['modal'] = chart;
+        } catch (error) {
+            console.error('Error rendering chart in modal:', error);
+        }
     }
 
     // Save chart for later use
