@@ -716,14 +716,28 @@ class ChartManager {
     // Save chart for later use
     async saveChart(chartType) {
         try {
-            const response = await fetch('/api/charts/save', {
+            if (!this.chartData || !this.chartData[chartType]) {
+                console.error('No chart data available for', chartType);
+                alert('No chart data available to save');
+                return;
+            }
+            
+            // Get chart details for a better title
+            const chartName = this.chartOptions.find(o => o.id === chartType)?.name || 'Chart';
+            const fileName = document.querySelector('.file-info-name')?.textContent || 'Data';
+            
+            const chartTitle = `${chartName} - ${fileName}`;
+            
+            // Make API request to save the chart
+            const response = await fetch('/api/chart', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     chart_type: chartType,
-                    chart_data: this.chartData[chartType]
+                    chart_title: chartTitle,
+                    file_index: 0  // Default to first file
                 }),
             });
             
@@ -733,9 +747,16 @@ class ChartManager {
                 // Show success message
                 alert('Chart saved successfully!');
                 
-                // Close modal
+                // Update the chart data if needed
+                if (data.chart_data) {
+                    this.chartData[chartType] = data.chart_data;
+                }
+                
+                // Close modal if open
                 const modal = document.getElementById('chartDetailModal');
-                modal.style.display = 'none';
+                if (modal && modal.style.display === 'block') {
+                    modal.style.display = 'none';
+                }
             } else {
                 console.error('Error saving chart:', data.error);
                 alert('Failed to save chart: ' + (data.error || 'Unknown error'));

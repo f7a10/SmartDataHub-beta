@@ -359,35 +359,51 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Download current report in modal
     function downloadCurrentReport() {
-        const reportId = this.dataset.reportId;
+        const reportId = this.dataset ? this.dataset.reportId : null;
         if (reportId) {
             downloadReport(reportId);
         } else {
             // Generate PDF from current modal content
             const reportPreview = document.getElementById('reportPreview');
             
-            // Use html2canvas and jsPDF
-            html2canvas(reportPreview).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
-                const imgWidth = canvas.width;
-                const imgHeight = canvas.height;
-                const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-                const imgX = (pdfWidth - imgWidth * ratio) / 2;
-                const imgY = 30;
+            try {
+                // Make sure jsPDF is defined and properly loaded
+                if (typeof window.jspdf === 'undefined') {
+                    // Use the global jsPDF object
+                    window.jspdf = window.jspdf || window.jsPDF;
+                }
                 
-                // Add title
-                pdf.setFontSize(20);
-                pdf.text('Data Analysis Report', pdfWidth / 2, 20, { align: 'center' });
-                
-                // Add image
-                pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-                
-                // Save PDF
-                pdf.save('data-analysis-report.pdf');
-            });
+                // Use html2canvas and jsPDF
+                html2canvas(reportPreview).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    
+                    // Use the jsPDF constructor properly
+                    const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = pdf.internal.pageSize.getHeight();
+                    const imgWidth = canvas.width;
+                    const imgHeight = canvas.height;
+                    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+                    const imgX = (pdfWidth - imgWidth * ratio) / 2;
+                    const imgY = 30;
+                    
+                    // Add title
+                    pdf.setFontSize(20);
+                    pdf.text('Data Analysis Report', pdfWidth / 2, 20, { align: 'center' });
+                    
+                    // Add image
+                    pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+                    
+                    // Save PDF
+                    pdf.save('data-analysis-report.pdf');
+                }).catch(err => {
+                    console.error('Error generating PDF:', err);
+                    alert('Error generating PDF: ' + err.message);
+                });
+            } catch (error) {
+                console.error('Error in PDF generation:', error);
+                alert('Could not generate PDF. Please check the console for details.');
+            }
         }
     }
     
@@ -444,30 +460,54 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Convert to PDF
-        html2canvas(tempContainer).then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            const imgWidth = canvas.width;
-            const imgHeight = canvas.height;
-            const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-            const imgX = (pdfWidth - imgWidth * ratio) / 2;
-            const imgY = 30;
+        try {
+            // Make sure jsPDF is defined and properly loaded
+            if (typeof window.jspdf === 'undefined') {
+                // Use the global jsPDF object
+                window.jspdf = window.jspdf || window.jsPDF;
+            }
             
-            // Add title
-            pdf.setFontSize(20);
-            pdf.text(report.title, pdfWidth / 2, 20, { align: 'center' });
-            
-            // Add image
-            pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-            
-            // Save PDF
-            pdf.save(`${report.title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
-            
-            // Clean up
-            document.body.removeChild(tempContainer);
-        });
+            html2canvas(tempContainer).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                
+                // Use the jsPDF constructor properly
+                const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+                const imgX = (pdfWidth - imgWidth * ratio) / 2;
+                const imgY = 30;
+                
+                // Add title
+                pdf.setFontSize(20);
+                pdf.text(report.title, pdfWidth / 2, 20, { align: 'center' });
+                
+                // Add image
+                pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+                
+                // Save PDF
+                pdf.save(`${report.title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+                
+                // Clean up
+                document.body.removeChild(tempContainer);
+            }).catch(err => {
+                console.error('Error generating PDF:', err);
+                alert('Error generating PDF: ' + err.message);
+                // Clean up on error
+                if (document.body.contains(tempContainer)) {
+                    document.body.removeChild(tempContainer);
+                }
+            });
+        } catch (error) {
+            console.error('Error in PDF generation:', error);
+            alert('Could not generate PDF. Please check the console for details.');
+            // Clean up on error
+            if (document.body.contains(tempContainer)) {
+                document.body.removeChild(tempContainer);
+            }
+        }
     }
     
     // Delete report
