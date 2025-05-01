@@ -197,8 +197,16 @@ button {
 }
 
 .section-header {
+    display: flex;
+    flex-direction: column;
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
+}
+
+.section-actions {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
 }
 
 .section-header h2 {
