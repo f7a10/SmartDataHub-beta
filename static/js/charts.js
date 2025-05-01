@@ -175,7 +175,7 @@ class ChartManager {
     // Render a chart with data
     renderChart(chartType, chartData) {
         const canvasId = `chart-${chartType}`;
-        const canvas = document.getElementById(canvasId);
+        let canvas = document.getElementById(canvasId);
         
         if (!canvas) {
             console.error(`Canvas element not found: ${canvasId}`);
@@ -188,9 +188,27 @@ class ChartManager {
             chartContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         
-        // If chart already exists, destroy it
-        if (this.activeCharts[chartType]) {
-            this.activeCharts[chartType].destroy();
+        try {
+            // If chart already exists, destroy it
+            if (this.activeCharts[chartType]) {
+                try {
+                    this.activeCharts[chartType].destroy();
+                } catch (error) {
+                    console.warn(`Failed to destroy previous chart: ${error.message}`);
+                }
+                delete this.activeCharts[chartType];
+            }
+            
+            // Create a fresh canvas to prevent Chart.js issues
+            const chartWrapper = canvas.parentNode;
+            if (chartWrapper) {
+                const newCanvas = document.createElement('canvas');
+                newCanvas.id = canvasId;
+                chartWrapper.replaceChild(newCanvas, canvas);
+                canvas = newCanvas;
+            }
+        } catch (error) {
+            console.error(`Error preparing chart canvas: ${error.message}`);
         }
         
         // Default chart options
@@ -266,39 +284,59 @@ class ChartManager {
 
     // Render line chart
     renderLineChart(canvas, chartData, options) {
-        const ctx = canvas.getContext('2d');
-        
-        this.activeCharts['line_chart'] = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: chartData.labels,
-                datasets: chartData.datasets.map(dataset => ({
-                    ...dataset,
-                    borderColor: dataset.borderColor || this.colors.primary,
-                    backgroundColor: dataset.backgroundColor || this.colors.background
-                }))
-            },
-            options: options
-        });
+        try {
+            const ctx = canvas.getContext('2d');
+            
+            if (!ctx) {
+                console.error('Could not get 2D context for line chart');
+                return;
+            }
+            
+            this.activeCharts['line_chart'] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.labels || [],
+                    datasets: (chartData.datasets || []).map(dataset => ({
+                        ...dataset,
+                        borderColor: dataset.borderColor || this.colors.primary,
+                        backgroundColor: dataset.backgroundColor || this.colors.background
+                    }))
+                },
+                options: options
+            });
+        } catch (error) {
+            console.error(`Error rendering line chart: ${error.message}`);
+            this.showChartError('line_chart', 'Failed to render chart');
+        }
     }
 
     // Render bar chart
     renderBarChart(canvas, chartData, options) {
-        const ctx = canvas.getContext('2d');
-        
-        this.activeCharts['bar_chart'] = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: chartData.labels,
-                datasets: chartData.datasets.map(dataset => ({
-                    ...dataset,
-                    backgroundColor: dataset.backgroundColor || this.colors.primary,
-                    borderColor: dataset.borderColor || this.colors.border,
-                    borderWidth: dataset.borderWidth || 1
-                }))
-            },
-            options: options
-        });
+        try {
+            const ctx = canvas.getContext('2d');
+            
+            if (!ctx) {
+                console.error('Could not get 2D context for bar chart');
+                return;
+            }
+            
+            this.activeCharts['bar_chart'] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.labels || [],
+                    datasets: (chartData.datasets || []).map(dataset => ({
+                        ...dataset,
+                        backgroundColor: dataset.backgroundColor || this.colors.primary,
+                        borderColor: dataset.borderColor || this.colors.border,
+                        borderWidth: dataset.borderWidth || 1
+                    }))
+                },
+                options: options
+            });
+        } catch (error) {
+            console.error(`Error rendering bar chart: ${error.message}`);
+            this.showChartError('bar_chart', 'Failed to render chart');
+        }
     }
 
     // Render pie chart
