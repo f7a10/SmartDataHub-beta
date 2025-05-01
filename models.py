@@ -68,6 +68,7 @@ class Upload(db.Model):
     file_size = db.Column(db.Integer, nullable=False)  # Size in bytes
     upload_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     session_id = db.Column(db.String(64), nullable=False)
+    active = db.Column(db.Boolean, default=True)  # Whether the file is active in the current session
     
     def __repr__(self):
         return f'<Upload {self.filename}>'

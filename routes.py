@@ -265,6 +265,10 @@ def upload_files():
     logger.debug(f"Request files: {request.files}")
 
     try:
+        # Check if we should clear previous files
+        clear_previous = request.form.get('clear_previous', 'false').lower() == 'true'
+        logger.debug(f"Clear previous files flag: {clear_previous}")
+        
         # Check if any files were uploaded
         uploaded_files = []
         if 'files[]' in request.files:
@@ -281,8 +285,16 @@ def upload_files():
             logger.warning("No files found in request")
             return jsonify({"success": False, "error": "No files selected"}), 400
 
-        # Get or create a session ID for this upload
-        if 'session_id' not in session:
+        # Create a new session ID if needed or if clear_previous is true
+        if 'session_id' not in session or clear_previous:
+            if clear_previous and 'session_id' in session:
+                old_session_id = session['session_id']
+                # Mark old session as inactive in the database
+                Upload.query.filter_by(session_id=old_session_id, user_id=current_user.id).update({'active': False})
+                db.session.commit()
+                logger.info(f"Marked files from previous session {old_session_id} as inactive")
+                
+            # Generate a new session ID
             session['session_id'] = str(uuid.uuid4())
             logger.info(f"Created new session_id: {session['session_id']}")
 
@@ -387,12 +399,19 @@ def analyze_data():
             logger.warning(f"Session folder does not exist: {session_folder}")
             return jsonify({"success": False, "error": "No files found for session"}), 404
 
-        all_files = [os.path.join(session_folder, f) for f in os.listdir(session_folder)
-                    if os.path.isfile(os.path.join(session_folder, f))]
+        # Get all files from database that are active for this session
+        active_uploads = Upload.query.filter_by(session_id=session_id, 
+                                              user_id=current_user.id, 
+                                              active=True).all()
+        
+        # Get the actual file paths
+        all_files = [os.path.join(session_folder, upload.filename) 
+                    for upload in active_uploads 
+                    if os.path.isfile(os.path.join(session_folder, upload.filename))]
 
         if not all_files:
-            logger.warning(f"No files found in session folder: {session_folder}")
-            return jsonify({"success": False, "error": "No files found"}), 404
+            logger.warning(f"No active files found for session: {session_id}")
+            return jsonify({"success": False, "error": "No active files found"}), 404
             
         # If file_indices is provided, filter the files
         files = all_files

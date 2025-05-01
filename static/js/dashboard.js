@@ -349,6 +349,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 formData.append('files[]', files[i]);
             }
             
+            // Add a clear_previous flag to tell the server to clear previous files
+            formData.append('clear_previous', 'true');
+            
             // Send request
             const response = await fetch('/upload', {
                 method: 'POST',
