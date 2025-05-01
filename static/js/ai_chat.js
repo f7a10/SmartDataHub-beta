@@ -449,6 +449,74 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Show suggested prompts
             suggestedPrompts.style.display = 'flex';
+        },
+        
+        // Save the current conversation before starting a new one
+        saveCurrentConversation: async function() {
+            // Check if there are any messages to save
+            if (!chatMessages.children.length || chatMessages.children.length < 2) {
+                console.log('No conversation to save or only welcome message present');
+                return;
+            }
+            
+            try {
+                // If we have a conversation ID, it's already saved
+                if (currentConversationId) {
+                    console.log('Conversation already saved with ID:', currentConversationId);
+                    return true;
+                }
+                
+                // Create a new conversation with the current messages
+                const messages = [];
+                const messageElements = chatMessages.querySelectorAll('.chat-message');
+                
+                // Skip first message if it's the welcome message
+                const startIndex = messageElements[0].classList.contains('ai-message') ? 1 : 0;
+                
+                // Need at least one user message to save
+                let hasUserMessage = false;
+                for (let i = startIndex; i < messageElements.length; i++) {
+                    const isUser = messageElements[i].classList.contains('user-message');
+                    if (isUser) hasUserMessage = true;
+                    const content = messageElements[i].querySelector('.message-content').textContent;
+                    messages.push({ is_user: isUser, content: content });
+                }
+                
+                if (!hasUserMessage) {
+                    console.log('No user messages to save');
+                    return false;
+                }
+                
+                // Create a default title based on first user message
+                const firstUserMsg = messages.find(m => m.is_user);
+                const title = firstUserMsg ? 
+                    (firstUserMsg.content.substring(0, 30) + (firstUserMsg.content.length > 30 ? '...' : '')) : 
+                    'Conversation ' + new Date().toLocaleString();
+                
+                // Send request to create conversation
+                const response = await fetch('/api/conversations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        messages: messages
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    console.log('Conversation saved successfully:', data.conversation_id);
+                    return true;
+                } else {
+                    console.error('Error saving conversation:', data.error);
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error saving conversation:', error);
+                return false;
+            }
         }
     };
 });

@@ -1046,6 +1046,51 @@ def get_conversations():
         logger.error(traceback.format_exc())
         return jsonify({"success": False, "error": str(e)}), 500
 
+@main.route('/api/conversations', methods=['POST'])
+@login_required
+def create_conversation():
+    """
+    Create a new conversation with multiple messages at once.
+    """
+    try:
+        data = request.get_json()
+        title = data.get('title', f"Conversation {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+        messages = data.get('messages', [])
+        
+        if not messages:
+            return jsonify({"success": False, "error": "No messages provided"}), 400
+            
+        # Create new conversation
+        conversation = Conversation(
+            user_id=current_user.id,
+            title=title
+        )
+        db.session.add(conversation)
+        db.session.flush()  # Get the ID without committing yet
+        
+        # Add all messages
+        for msg_data in messages:
+            message = Message(
+                conversation_id=conversation.id,
+                is_user=msg_data.get('is_user', True),
+                content=msg_data.get('content', '')
+            )
+            db.session.add(message)
+            
+        # Commit all changes at once
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "conversation_id": conversation.id,
+            "message": "Conversation created successfully"
+        })
+        
+    except Exception as e:
+        logger.error(f"Error creating conversation: {str(e)}")
+        db.session.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @main.route('/api/conversations/<int:conversation_id>', methods=['GET'])
 @login_required
 def get_conversation(conversation_id):
