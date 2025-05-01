@@ -113,15 +113,15 @@ class OpenRouterAI:
         Returns:
             AI-generated response
         """
-        if not chat_history:
+        if chat_history is None:
             chat_history = []
             
-        if not file_data:
+        if file_data is None:
             file_data = {}
             
         return self.answer_question(user_message, file_data, chat_history)
 
-    def answer_question(self, question: str, data_context: Dict[str, Any], chat_history: List[Dict[str, str]] = None) -> str:
+    def answer_question(self, question: str, data_context: Dict[str, Any] = None, chat_history: List[Dict[str, str]] = None) -> str:
         """
         Answer a user question about their data.
 
@@ -136,6 +136,12 @@ class OpenRouterAI:
         try:
             if not self.client:
                 return "AI service is not properly initialized. Please check your configuration."
+                
+            if data_context is None:
+                data_context = {}
+                
+            if chat_history is None:
+                chat_history = []
 
             logger.info(f"Answering question: {question}")
 
