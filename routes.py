@@ -339,7 +339,7 @@ def upload_files():
         db.session.rollback()
         return jsonify({"success": False, "error": str(e)}), 500
 
-@main.route('/analyze', methods=['GET'])
+@main.route('/analyze', methods=['GET', 'POST'])
 @login_required
 def analyze_data():
     """
@@ -351,6 +351,30 @@ def analyze_data():
             logger.warning("No session ID found")
             return jsonify({"success": False, "error": "No active session"}), 400
 
+        # Get request parameters - either from JSON body (POST) or query params (GET)
+        if request.method == 'POST':
+            data = request.get_json() or {}
+        else:
+            data = request.args.to_dict()
+            
+        # Parse parameters
+        file_indices_param = data.get('file_indices', [])
+        if isinstance(file_indices_param, str):
+            try:
+                # Try to parse as JSON string
+                file_indices = json.loads(file_indices_param)
+            except json.JSONDecodeError:
+                # Fall back to comma-separated string
+                file_indices = [int(idx.strip()) for idx in file_indices_param.split(',') if idx.strip().isdigit()]
+        else:
+            file_indices = file_indices_param
+            
+        combine_files = data.get('combine_files', False)
+        if isinstance(combine_files, str):
+            combine_files = combine_files.lower() in ['true', '1', 'yes']
+        
+        logger.debug(f"Analysis parameters: file_indices={file_indices}, combine_files={combine_files}")
+        
         session_id = session['session_id']
         logger.debug(f"Using session_id: {session_id}")
         upload_folder = current_app.config.get('UPLOAD_FOLDER', 'uploads')
@@ -360,23 +384,48 @@ def analyze_data():
             logger.warning(f"Session folder does not exist: {session_folder}")
             return jsonify({"success": False, "error": "No files found for session"}), 404
 
-        files = [os.path.join(session_folder, f) for f in os.listdir(session_folder)
-                if os.path.isfile(os.path.join(session_folder, f))]
+        all_files = [os.path.join(session_folder, f) for f in os.listdir(session_folder)
+                    if os.path.isfile(os.path.join(session_folder, f))]
 
-        if not files:
+        if not all_files:
             logger.warning(f"No files found in session folder: {session_folder}")
             return jsonify({"success": False, "error": "No files found"}), 404
-
+            
+        # If file_indices is provided, filter the files
+        files = all_files
+        if file_indices and len(file_indices) > 0:
+            try:
+                # Convert indices to integers and filter files
+                indices = [int(i) for i in file_indices]
+                files = [all_files[i] for i in indices if 0 <= i < len(all_files)]
+                logger.debug(f"Selected files by indices {indices}: {files}")
+                
+                # If only one file is selected, don't combine regardless of settings
+                if len(files) == 1:
+                    combine_files = False
+                    logger.debug("Single file selected, disabling combine_files")
+            except Exception as idx_error:
+                logger.error(f"Error selecting files by indices: {str(idx_error)}")
+                # Fall back to using all files
+                files = all_files
+                logger.debug("Falling back to using all files")
+        
         logger.debug(f"Found files: {files}")
-        logger.info(f"Processing {len(files)} files")
-        processed_data = process_files_directly(files)
+        logger.info(f"Processing {len(files)} files (combine_files: {combine_files})")
+        
+        # Process data with combine_files flag
+        processed_data = process_files_directly(files, combine_files)
 
         if not processed_data.get("success", False):
             logger.warning("File processing failed")
             return jsonify({"success": False, "error": "File processing failed", "details": processed_data}), 500
 
-        dashboard_data = generate_dashboard_data_from_files(processed_data, files, session_id)
+        # Generate dashboard data
+        dashboard_data = generate_dashboard_data_from_files(processed_data, files, session_id, combine_files)
         dashboard_data["files"] = [os.path.basename(f) for f in files]
+        dashboard_data["all_files"] = [os.path.basename(f) for f in all_files]
+        dashboard_data["combine_files"] = combine_files
+        dashboard_data["file_indices"] = file_indices if file_indices else list(range(len(all_files)))
         dashboard_data["success"] = True
 
         try:
@@ -385,7 +434,8 @@ def analyze_data():
                 data_summary = {
                     "files": [os.path.basename(f) for f in files],
                     "metrics": dashboard_data.get("metrics", {}),
-                    "data_overview": processed_data
+                    "data_overview": processed_data,
+                    "combine_files": combine_files
                 }
                 ai_insights = ai_client.analyze_data_initial(data_summary)
                 dashboard_data["ai_insights"] = ai_insights
@@ -402,13 +452,108 @@ def analyze_data():
         logger.error(traceback.format_exc())
         return jsonify({"success": False, "error": str(e)}), 500
 
-def process_files_directly(file_paths):
+def process_files_directly(file_paths, combine_files=False):
     """
     Direct file processing to extract summary data from files.
+    
+    Args:
+        file_paths: List of paths to files to process
+        combine_files: If True, combines all files into one dataframe for analysis
+    
+    Returns:
+        Dictionary with processed data information
     """
     results = {"success": False}
     file_data = {}
+    combined_df = None
+    
     try:
+        if combine_files and len(file_paths) > 1:
+            logger.info(f"Processing {len(file_paths)} files in combined mode")
+            all_dfs = []
+            
+            # First try to load all files
+            for file_path in file_paths:
+                file_name = os.path.basename(file_path)
+                _, ext = os.path.splitext(file_path)
+                ext = ext.lower()
+                
+                try:
+                    if ext == '.csv':
+                        df = pd.read_csv(file_path, encoding='utf-8', on_bad_lines='skip')
+                    elif ext in ['.xlsx', '.xls']:
+                        df = pd.read_excel(file_path)
+                    elif ext == '.json':
+                        df = pd.read_json(file_path)
+                    else:
+                        df = pd.read_csv(file_path, sep=None, engine='python', on_bad_lines='skip')
+                    
+                    # Add a source column to track which file the data came from
+                    df['_source_file'] = file_name
+                    all_dfs.append(df)
+                    logger.info(f"Successfully loaded file {file_name} with shape {df.shape}")
+                except Exception as file_error:
+                    logger.error(f"Error loading file {file_name} for combined analysis: {str(file_error)}")
+                    # If any file fails, we'll fall back to individual processing
+                    combine_files = False
+                    break
+            
+            # If all files loaded successfully, combine them
+            if combine_files and all_dfs:
+                try:
+                    combined_df = pd.concat(all_dfs, ignore_index=True)
+                    logger.info(f"Combined {len(all_dfs)} files into dataframe with shape {combined_df.shape}")
+                    
+                    # Process the combined dataframe
+                    summary = {
+                        "shape": {"rows": combined_df.shape[0], "columns": combined_df.shape[1]},
+                        "columns": list(combined_df.columns),
+                        "dtypes": {col: str(combined_df[col].dtype) for col in combined_df.columns},
+                        "missing_data": {col: int(combined_df[col].isnull().sum()) for col in combined_df.columns},
+                        "numeric_columns": {},
+                        "categorical_columns": {},
+                        "source_files": [os.path.basename(f) for f in file_paths]
+                    }
+                    
+                    for col in combined_df.select_dtypes(include=['number']).columns:
+                        if col == '_source_file':
+                            continue
+                        summary["numeric_columns"][str(col)] = {
+                            "min": float(combined_df[col].min()) if not pd.isna(combined_df[col].min()) else 0,
+                            "max": float(combined_df[col].max()) if not pd.isna(combined_df[col].max()) else 0,
+                            "mean": float(combined_df[col].mean()) if not pd.isna(combined_df[col].mean()) else 0,
+                            "median": float(combined_df[col].median()) if not pd.isna(combined_df[col].median()) else 0,
+                            "std": float(combined_df[col].std()) if not pd.isna(combined_df[col].std()) else 0
+                        }
+                    
+                    for col in combined_df.select_dtypes(include=['object', 'category']).columns:
+                        value_counts = combined_df[col].value_counts().head(10).to_dict()
+                        # Convert keys to strings (in case they're not)
+                        str_value_counts = {str(k): int(v) for k, v in value_counts.items()}
+                        summary["categorical_columns"][str(col)] = str_value_counts
+                    
+                    # Add file breakdown information
+                    summary["file_breakdown"] = combined_df['_source_file'].value_counts().to_dict()
+                    
+                    # Store as combined data
+                    file_data["combined_data"] = summary
+                    
+                    # Set success flag and return
+                    results = {
+                        "success": True,
+                        "data": file_data,
+                        "combined": True
+                    }
+                    return results
+                    
+                except Exception as combine_error:
+                    logger.error(f"Error combining files: {str(combine_error)}")
+                    logger.error(traceback.format_exc())
+                    # Fall back to individual processing
+                    combine_files = False
+        
+        # If not combining or combining failed, process files individually
+        logger.info(f"Processing {len(file_paths)} files individually")
         for file_path in file_paths:
             file_name = os.path.basename(file_path)
             _, ext = os.path.splitext(file_path)
@@ -459,7 +604,8 @@ def process_files_directly(file_paths):
 
         results = {
             "success": True,
-            "data": file_data
+            "data": file_data,
+            "combined": False
         }
 
     except Exception as e:
