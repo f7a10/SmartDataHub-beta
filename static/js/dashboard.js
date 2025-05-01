@@ -299,6 +299,26 @@ document.addEventListener('DOMContentLoaded', function() {
         analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
         
         try {
+            // Clean up previous charts to avoid rendering conflicts
+            try {
+                if (chartManager && typeof chartManager.clearAllCharts === 'function') {
+                    chartManager.clearAllCharts();
+                }
+                
+                // Reset chart containers if they exist
+                const chartsContainers = document.querySelectorAll('[id^="chart-container-"]');
+                chartsContainers.forEach(container => {
+                    const canvasId = container.querySelector('canvas')?.id;
+                    if (canvasId) {
+                        const chartType = canvasId.replace('chart-', '');
+                        container.innerHTML = `<canvas id="${canvasId}"></canvas>`;
+                    }
+                });
+                console.log('Previous charts cleaned up successfully');
+            } catch (clearError) {
+                console.warn('Error clearing previous charts:', clearError);
+            }
+            
             // First, upload the files if not already done
             if (!sessionData.sessionId) {
                 const uploadResult = await uploadFiles(sessionData.files);
@@ -391,31 +411,57 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Display analysis results
     function displayAnalysisResults(results) {
-        // Show dashboard section
-        dashboardSection.style.display = 'block';
-        
-        // Display metrics
-        displayMetrics(results.metrics);
-        
-        // Initialize chart options
-        if (results.chart_options && results.chart_options.length > 0) {
-            chartManager.setChartOptions(results.chart_options);
+        try {
+            // Show dashboard section
+            dashboardSection.style.display = 'block';
+            
+            // Display metrics
+            if (results.metrics) {
+                displayMetrics(results.metrics);
+            }
+            
+            // Initialize chart options and data with careful error handling
+            setTimeout(() => {
+                try {
+                    // Initialize chart options first
+                    if (results.chart_options && Array.isArray(results.chart_options) && results.chart_options.length > 0) {
+                        chartManager.setChartOptions(results.chart_options);
+                        console.log('Chart options set successfully');
+                    } else {
+                        console.warn('No valid chart options received');
+                    }
+                    
+                    // Then set chart data - delay to prevent race conditions
+                    setTimeout(() => {
+                        try {
+                            if (results.visualizations && typeof results.visualizations === 'object') {
+                                chartManager.setChartData(results.visualizations);
+                                console.log('Chart data set successfully');
+                            } else {
+                                console.warn('No valid visualizations data received');
+                            }
+                        } catch (chartDataError) {
+                            console.error('Error setting chart data:', chartDataError);
+                        }
+                    }, 100);
+                } catch (chartOptionsError) {
+                    console.error('Error setting chart options:', chartOptionsError);
+                }
+            }, 100);
+            
+            // Display AI insights
+            if (results.ai_insights) {
+                aiInsightsContent.textContent = results.ai_insights;
+            } else {
+                aiInsightsContent.textContent = "No AI insights available for this data.";
+            }
+            
+            // Scroll to dashboard section
+            dashboardSection.scrollIntoView({ behavior: 'smooth' });
+        } catch (error) {
+            console.error('Error displaying analysis results:', error);
+            showNotification('Error displaying analysis results. Please try again.', 'error');
         }
-        
-        // Set chart data
-        if (results.visualizations) {
-            chartManager.setChartData(results.visualizations);
-        }
-        
-        // Display AI insights
-        if (results.ai_insights) {
-            aiInsightsContent.textContent = results.ai_insights;
-        } else {
-            aiInsightsContent.textContent = "No AI insights available for this data.";
-        }
-        
-        // Scroll to dashboard section
-        dashboardSection.scrollIntoView({ behavior: 'smooth' });
     }
     
     // Display metrics

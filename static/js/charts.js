@@ -30,6 +30,32 @@ class ChartManager {
     setChartData(data) {
         this.chartData = data;
     }
+    
+    // Clear all active charts to prevent rendering conflicts
+    clearAllCharts() {
+        try {
+            console.log('Clearing all active charts');
+            // Destroy all active chart instances
+            for (const chartType in this.activeCharts) {
+                if (this.activeCharts[chartType]) {
+                    try {
+                        this.activeCharts[chartType].destroy();
+                        console.log(`Chart ${chartType} destroyed successfully`);
+                    } catch (error) {
+                        console.warn(`Error destroying chart ${chartType}: ${error.message}`);
+                    }
+                }
+            }
+            
+            // Reset active charts object
+            this.activeCharts = {};
+            
+            return true;
+        } catch (error) {
+            console.error('Error clearing all charts:', error);
+            return false;
+        }
+    }
 
     // Render chart selection options
     renderChartOptions() {
