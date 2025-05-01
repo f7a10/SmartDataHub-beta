@@ -299,10 +299,21 @@ document.addEventListener('DOMContentLoaded', function() {
         analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
         
         try {
+            // Reset the previous analysis results
+            sessionData.metrics = {};
+            sessionData.chartOptions = [];
+            
+            // Clear the metrics grid
+            metricsGrid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Calculating metrics...</div>';
+            
+            // Clear AI insights
+            aiInsightsContent.textContent = "Generating insights...";
+            
             // Clean up previous charts to avoid rendering conflicts
             try {
                 if (chartManager && typeof chartManager.clearAllCharts === 'function') {
                     chartManager.clearAllCharts();
+                    console.log('Clearing all active charts');
                 }
                 
                 // Reset chart containers if they exist
@@ -340,18 +351,29 @@ document.addEventListener('DOMContentLoaded', function() {
             );
             
             if (analysisResult.success) {
-                // Store data in session
-                sessionData.metrics = analysisResult.metrics || {};
-                sessionData.chartOptions = analysisResult.chart_options || [];
+                // Store data in session with fresh copies
+                sessionData.metrics = analysisResult.metrics ? { ...analysisResult.metrics } : {};
+                sessionData.chartOptions = analysisResult.chart_options ? [ ...analysisResult.chart_options ] : [];
                 
-                // Update UI with results
+                // Additional logging to debug data flow
+                console.log('Retrieved metrics from server:', analysisResult.metrics);
+                console.log('Updated session metrics:', sessionData.metrics);
+                
+                // Update UI with results - forcing display to refresh with new data
+                dashboardSection.style.display = 'block';  // Make sure the section is visible
                 displayAnalysisResults(analysisResult);
             } else {
                 showNotification('Error analyzing files: ' + (analysisResult.error || 'Unknown error'), 'error');
+                // Clear any stale UI elements on error
+                metricsGrid.innerHTML = '<div class="error-state">Analysis failed. Please try again.</div>';
+                aiInsightsContent.textContent = "Unable to generate insights. Please try again.";
             }
         } catch (error) {
             console.error('Error during analysis:', error);
             showNotification('An error occurred during analysis', 'error');
+            // Clear any stale UI elements on error
+            metricsGrid.innerHTML = '<div class="error-state">Analysis failed. Please try again.</div>';
+            aiInsightsContent.textContent = "Unable to generate insights. Please try again.";
         } finally {
             // Reset button state
             analyzeBtn.disabled = sessionData.selectedFileIndices.length === 0;

@@ -28,7 +28,23 @@ class ChartManager {
 
     // Store chart data from API
     setChartData(data) {
-        this.chartData = data;
+        console.log('Setting chart data:', data);
+        
+        // Reset existing chart data
+        this.chartData = {};
+        
+        // Make a deep copy of the data to prevent reference issues
+        if (data && typeof data === 'object') {
+            // Save a fresh copy of the chart data
+            for (const chartType in data) {
+                if (data.hasOwnProperty(chartType) && data[chartType]) {
+                    this.chartData[chartType] = JSON.parse(JSON.stringify(data[chartType]));
+                    console.log(`Stored fresh data for chart type: ${chartType}`);
+                }
+            }
+        } else {
+            console.warn('Invalid chart data format provided:', data);
+        }
     }
     
     // Clear all active charts to prevent rendering conflicts
@@ -184,7 +200,7 @@ class ChartManager {
                     },
                     body: JSON.stringify({
                         chart_type: chartType,
-                        file_index: 0  // Default to first file
+                        file_index: window.sessionData?.selectedFileIndices?.[0] || 0  // Use selected file index if available
                     }),
                 });
                 

@@ -812,7 +812,10 @@ def generate_chart():
         chart_type = data.get('chart_type')
         file_index = data.get('file_index', 0)
         
+        logger.info(f"Chart generation request received - Type: {chart_type}, File Index: {file_index}")
+        
         if 'session_id' not in session:
+            logger.warning("No active session found for chart generation")
             return jsonify({"success": False, "error": "No active session"}), 400
             
         session_id = session['session_id']
@@ -820,15 +823,38 @@ def generate_chart():
         session_folder = os.path.join(upload_folder, session_id)
         
         if not os.path.exists(session_folder):
+            logger.warning(f"Session folder not found: {session_folder}")
             return jsonify({"success": False, "error": "No files found for session"}), 404
             
+        # Get all files in session folder
         files = [os.path.join(session_folder, f) for f in os.listdir(session_folder)
                 if os.path.isfile(os.path.join(session_folder, f))]
                 
         if not files:
+            logger.warning(f"No files found in session folder: {session_folder}")
             return jsonify({"success": False, "error": "No files found"}), 404
+        
+        # Log available files for debugging
+        logger.debug(f"Available files: {[os.path.basename(f) for f in files]}")
+        
+        # Safely handle file index
+        if isinstance(file_index, str):
+            try:
+                file_index = int(file_index)
+            except ValueError:
+                logger.warning(f"Invalid file index format: {file_index}, defaulting to 0")
+                file_index = 0
+                
+        # Use the specified file if index is valid, otherwise use the first file
+        if 0 <= file_index < len(files):
+            file_path = files[file_index]
+            logger.info(f"Using file at index {file_index}: {os.path.basename(file_path)}")
+        else:
+            file_path = files[0]
+            logger.warning(f"File index {file_index} out of range, using first file: {os.path.basename(file_path)}")
             
-        file_path = files[file_index] if file_index < len(files) else files[0]
+        # Load dataframe from selected file
+        logger.debug(f"Loading dataframe from {file_path}")
         df = load_dataframe(file_path)
         
         if df is None:
