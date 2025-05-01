@@ -954,55 +954,73 @@ document.addEventListener('DOMContentLoaded', function() {
     // Start a new analysis session
     function startNewAnalysis() {
         // Show confirmation dialog
-        if (confirm("Start a new analysis? This will clear your current analysis.")) {
-            // Reset session data
-            sessionData = {
-                files: [],
-                metrics: {},
-                chartOptions: [],
-                sessionId: null,
-                selectedFileIndices: [],
-                combineFiles: false
-            };
-            
-            // Clear UI elements
-            fileList.innerHTML = '';
-            if (document.getElementById('file-analysis-controls')) {
-                document.getElementById('file-analysis-controls').remove();
+        if (confirm("Start a new analysis? This will save your current conversation and start a new analysis.")) {
+            // Save current conversation first, then create new session
+            saveCurrentConversation().then(() => {
+                // Reset session data
+                sessionData = {
+                    files: [],
+                    metrics: {},
+                    chartOptions: [],
+                    sessionId: null,
+                    selectedFileIndices: [],
+                    combineFiles: false
+                };
+                
+                // Clear UI elements
+                fileList.innerHTML = '';
+                if (document.getElementById('file-analysis-controls')) {
+                    document.getElementById('file-analysis-controls').remove();
+                }
+                
+                // Reset file input
+                fileInput.value = '';
+                
+                // Disable analyze button
+                analyzeBtn.disabled = true;
+                
+                // Clear charts and metrics if displayed
+                if (chartManager && typeof chartManager.clearAllCharts === 'function') {
+                    chartManager.clearAllCharts();
+                }
+                
+                metricsGrid.innerHTML = '';
+                
+                // Reset chat section
+                if (window.AIChat && typeof window.AIChat.resetChat === 'function') {
+                    window.AIChat.resetChat();
+                }
+                
+                // Show upload section, hide dashboard section
+                showSection('dashboard');
+                dashboardSection.style.display = 'none';
+                
+                // Clear AI insights
+                if (aiInsightsContent) {
+                    aiInsightsContent.innerHTML = '';
+                }
+                
+                // Create a new session on the server side
+                createNewServerSession();
+                
+                // Show success notification
+                showNotification('Previous conversation saved and new analysis started', 'success');
+            });
+        }
+    }
+    
+    // Save current conversation before starting a new one
+    async function saveCurrentConversation() {
+        try {
+            // Check if AIChat has an active conversation
+            if (window.AIChat && typeof window.AIChat.saveCurrentConversation === 'function') {
+                await window.AIChat.saveCurrentConversation();
+                console.log('Current conversation saved successfully');
+            } else {
+                console.log('No active conversation to save or saveCurrentConversation not available');
             }
-            
-            // Reset file input
-            fileInput.value = '';
-            
-            // Disable analyze button
-            analyzeBtn.disabled = true;
-            
-            // Clear charts and metrics if displayed
-            if (chartManager && typeof chartManager.clearAllCharts === 'function') {
-                chartManager.clearAllCharts();
-            }
-            
-            metricsGrid.innerHTML = '';
-            
-            // Reset chat section
-            if (window.AIChat && typeof window.AIChat.resetChat === 'function') {
-                window.AIChat.resetChat();
-            }
-            
-            // Show upload section, hide dashboard section
-            showSection('dashboard');
-            dashboardSection.style.display = 'none';
-            
-            // Clear AI insights
-            if (aiInsightsContent) {
-                aiInsightsContent.innerHTML = '';
-            }
-            
-            // Create a new session on the server side
-            createNewServerSession();
-            
-            // Show success notification
-            showNotification('Started new analysis session', 'success');
+        } catch (error) {
+            console.error('Error saving conversation:', error);
         }
     }
     
