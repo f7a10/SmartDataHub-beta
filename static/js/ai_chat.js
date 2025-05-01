@@ -431,6 +431,24 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         
         // Load conversations
-        loadConversations: loadConversations
+        loadConversations: loadConversations,
+        
+        // Reset chat to initial state
+        resetChat: function() {
+            // Clear existing messages
+            chatMessages.innerHTML = '';
+            
+            // Reset conversation ID
+            currentConversationId = null;
+            
+            // Load welcome message again
+            loadWelcomeMessage();
+            
+            // Clear input
+            chatInput.value = '';
+            
+            // Show suggested prompts
+            suggestedPrompts.style.display = 'flex';
+        }
     };
 });
