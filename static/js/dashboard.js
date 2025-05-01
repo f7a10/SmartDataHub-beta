@@ -945,4 +945,82 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 300);
         }, 5000);
     }
+    
+    // Start a new analysis session
+    function startNewAnalysis() {
+        // Show confirmation dialog
+        if (confirm("Start a new analysis? This will clear your current analysis.")) {
+            // Reset session data
+            sessionData = {
+                files: [],
+                metrics: {},
+                chartOptions: [],
+                sessionId: null,
+                selectedFileIndices: [],
+                combineFiles: false
+            };
+            
+            // Clear UI elements
+            fileList.innerHTML = '';
+            if (document.getElementById('file-analysis-controls')) {
+                document.getElementById('file-analysis-controls').remove();
+            }
+            
+            // Reset file input
+            fileInput.value = '';
+            
+            // Disable analyze button
+            analyzeBtn.disabled = true;
+            
+            // Clear charts and metrics if displayed
+            if (chartManager && typeof chartManager.clearAllCharts === 'function') {
+                chartManager.clearAllCharts();
+            }
+            
+            metricsGrid.innerHTML = '';
+            
+            // Reset chat section
+            if (window.AIChat && typeof window.AIChat.resetChat === 'function') {
+                window.AIChat.resetChat();
+            }
+            
+            // Show upload section, hide dashboard section
+            showSection('dashboard');
+            dashboardSection.style.display = 'none';
+            
+            // Clear AI insights
+            if (aiInsightsContent) {
+                aiInsightsContent.innerHTML = '';
+            }
+            
+            // Create a new session on the server side
+            createNewServerSession();
+            
+            // Show success notification
+            showNotification('Started new analysis session', 'success');
+        }
+    }
+    
+    // Create a new session on the server
+    async function createNewServerSession() {
+        try {
+            const formData = new FormData();
+            formData.append('clear_previous', 'true');
+            
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    sessionData.sessionId = data.session_id;
+                    console.log('New session created:', sessionData.sessionId);
+                }
+            }
+        } catch (error) {
+            console.error('Error creating new session:', error);
+        }
+    }
 });

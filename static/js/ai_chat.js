@@ -1,5 +1,8 @@
 // AI Chat - Handles the AI chat interaction
 
+// Create a global namespace for AI Chat functions
+window.AIChat = {};
+
 document.addEventListener('DOMContentLoaded', function() {
     // DOM elements
     const chatMessages = document.getElementById('chatMessages');
@@ -12,6 +15,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize chat
     initChat();
+    
+    // Expose functions to global namespace
+    window.AIChat.resetChat = resetChat;
+    window.AIChat.loadConversations = loadConversations;
     
     // Main functions
     function initChat() {
