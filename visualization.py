@@ -2,7 +2,9 @@ import pandas as pd
 import numpy as np
 import json
 import logging
+import os
 import traceback
+import time
 from typing import Dict, Any, List, Optional, Union
 
 # Set up logging
@@ -32,6 +34,9 @@ class DataVisualizer:
             if not data_files:
                 logger.warning("No data files provided")
                 return {"error": "No data files provided"}
+                
+            logger.info(f"Generating visualizations for {len(data_files)} files (combine_files={combine_files})")
+            logger.debug(f"Files to process: {[os.path.basename(f) for f in data_files]}")
 
             if combine_files and len(data_files) > 1:
                 logger.info(f"Generating visualizations for {len(data_files)} combined files")
@@ -39,13 +44,19 @@ class DataVisualizer:
                 # Load and combine all dataframes
                 dfs = []
                 for file_path in data_files:
+                    file_name = os.path.basename(file_path)
+                    logger.debug(f"Loading file for combined analysis: {file_name}")
                     df = self._load_file(file_path)
                     if df is not None:
                         # Add source column
-                        df['_source_file'] = file_path.split('/')[-1]
+                        df['_source_file'] = file_name
                         dfs.append(df)
+                        logger.debug(f"Added file {file_name} with shape {df.shape} to combined analysis")
+                    else:
+                        logger.warning(f"Failed to load file {file_name} for combined analysis")
                 
                 if not dfs:
+                    logger.error("Failed to load any files for visualization")
                     return {"error": "Failed to load any files"}
                 
                 # Combine all dataframes
@@ -56,16 +67,18 @@ class DataVisualizer:
                     logger.error(f"Error combining dataframes: {str(e)}")
                     # Fall back to first file
                     df = dfs[0]
-                    logger.info(f"Falling back to first file with shape {df.shape}")
+                    logger.warning(f"Falling back to first file with shape {df.shape}")
             else:
-                # Just process the first file
-                first_file = data_files[0]
-                logger.info(f"Generating visualizations for file: {first_file}")
+                # Just process the file(s) provided
+                file_to_process = data_files[0]  # Start with the first file by default
+                file_name = os.path.basename(file_to_process)
+                logger.info(f"Generating visualizations for single file: {file_name}")
 
                 # Load the dataframe
-                df = self._load_file(first_file)
+                df = self._load_file(file_to_process)
                 if df is None:
-                    return {"error": "Failed to load file"}
+                    logger.error(f"Failed to load file {file_name} for visualization")
+                    return {"error": f"Failed to load file {file_name}"}
 
             # Generate visualizations
             visualizations = {

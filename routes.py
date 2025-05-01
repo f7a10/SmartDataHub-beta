@@ -435,20 +435,29 @@ def analyze_data():
         logger.debug(f"Found files: {files}")
         logger.info(f"Processing {len(files)} files (combine_files: {combine_files})")
         
+        # Create a deep copy of the selected file list to avoid any reference issues
+        selected_files = list(files)
+        
         # Process data with combine_files flag
-        processed_data = process_files_directly(files, combine_files)
+        processed_data = process_files_directly(selected_files, combine_files)
 
         if not processed_data.get("success", False):
             logger.warning("File processing failed")
             return jsonify({"success": False, "error": "File processing failed", "details": processed_data}), 500
 
-        # Generate dashboard data
-        dashboard_data = generate_dashboard_data_from_files(processed_data, files, session_id, combine_files)
-        dashboard_data["files"] = [os.path.basename(f) for f in files]
+        # Generate dashboard data with the selected files 
+        dashboard_data = generate_dashboard_data_from_files(processed_data, selected_files, session_id, combine_files)
+        
+        # Add file information to response
+        dashboard_data["files"] = [os.path.basename(f) for f in selected_files]
         dashboard_data["all_files"] = [os.path.basename(f) for f in all_files]
+        dashboard_data["selected_file_count"] = len(selected_files)
         dashboard_data["combine_files"] = combine_files
         dashboard_data["file_indices"] = file_indices if file_indices else list(range(len(all_files)))
         dashboard_data["success"] = True
+        
+        # Add timestamp to force frontend cache refresh
+        dashboard_data["timestamp"] = int(time.time())
 
         try:
             ai_client = get_ai_instance()
