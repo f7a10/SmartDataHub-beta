@@ -117,7 +117,13 @@ class ChartManager {
         }
         
         // Make the dashboard section visible by scrolling to it
-        document.getElementById('analysisSection').scrollIntoView({ behavior: 'smooth' });
+        const analysisSection = document.getElementById('analysisSection');
+        if (analysisSection) {
+            analysisSection.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            // Fallback - try scrolling to dashboard section instead
+            dashboardSection?.scrollIntoView({ behavior: 'smooth' });
+        }
         
         // Create chart container if it doesn't exist
         if (!document.getElementById(`chart-${chartType}`)) {
