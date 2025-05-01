@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartDataHub - AI-Powered Data Analysis</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <!-- Header Section -->
+  <header class="header">
+    <div class="logo">
+      <i class="fas fa-chart-bar"></i>
+      <h1>SmartDataHub</h1>
+    </div>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="{{ url_for('main.login') }}">Login</a></li>
+        <li><a href="{{ url_for('main.register') }}" class="btn-enterprise">Sign Up</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h2>Unlock the Power of Your Data with AI</h2>
+      <p>Upload your data files and get instant analysis, interactive visualizations, and AI-powered insights to make better decisions.</p>
+      <a href="{{ url_for('main.register') }}" class="btn-hero">Get Started <i class="fas fa-arrow-right"></i></a>
+    </div>
+    <div class="hero-image">
+      <img src="https://images.unsplash.com/photo-1556691421-cf15fe27a0b6" alt="Data visualization dashboard" class="responsive-img">
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="features-section">
+    <div class="section-header">
+      <h2>Powerful Features</h2>
+      <p>Everything you need to analyze and visualize your data</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-robot"></i>
+        </div>
+        <h3>AI-Powered Analysis</h3>
+        <p>Get intelligent insights and recommendations based on your data through our advanced AI engine.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <h3>Interactive Visualizations</h3>
+        <p>Create beautiful, interactive charts that help you understand and explore your data.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-comments"></i>
+        </div>
+        <h3>Natural Language Queries</h3>
+        <p>Ask questions about your data in plain English and get immediate answers.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-file-export"></i>
+        </div>
+        <h3>Detailed Reports</h3>
+        <p>Generate and download comprehensive reports with visualizations and insights.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-cloud-upload-alt"></i>
+        </div>
+        <h3>Multiple File Formats</h3>
+        <p>Support for CSV, Excel, JSON, and text files with automatic data type detection.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-lock"></i>
+        </div>
+        <h3>Secure Storage</h3>
+        <p>Your data and analysis are securely stored and accessible anytime.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Showcase Section -->
+  <section class="showcase-section">
+    <div class="showcase-content">
+      <h2>Transform Data into Insights</h2>
+      <p>SmartDataHub helps you understand complex data through beautiful visualizations and AI-powered analysis.</p>
+      <ul class="showcase-list">
+        <li><i class="fas fa-check"></i> Upload any data file</li>
+        <li><i class="fas fa-check"></i> Get instant visualizations</li>
+        <li><i class="fas fa-check"></i> Ask questions to our AI</li>
+        <li><i class="fas fa-check"></i> Download reports</li>
+      </ul>
+      <a href="{{ url_for('main.register') }}" class="btn-showcase">Start Free</a>
+    </div>
+    <div class="showcase-image">
+      <img src="https://images.unsplash.com/photo-1524114051012-0a2aa8dae4e1" alt="Interactive analytics dashboard" class="responsive-img">
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="about-section">
+    <div class="section-header">
+      <h2>About SmartDataHub</h2>
+      <p>The smarter way to analyze your data</p>
+    </div>
+    <div class="about-content">
+      <p>SmartDataHub combines powerful data analysis tools with cutting-edge AI to help you understand your data like never before. Whether you're a data scientist, business analyst, or just someone with data to analyze, our platform makes it easy to get meaningful insights quickly.</p>
+      <p>Our mission is to democratize data analysis by making powerful tools accessible to everyone, regardless of technical background.</p>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="cta-content">
+      <h2>Ready to unlock the power of your data?</h2>
+      <p>Sign up today and start exploring your data with SmartDataHub.</p>
+      <a href="{{ url_for('main.register') }}" class="btn-cta">Get Started</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-logo">
+        <i class="fas fa-chart-bar"></i>
+        <span>SmartDataHub</span>
+      </div>
+      <div class="footer-links">
+        <div class="footer-column">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#">Features</a></li>
+            <li><a href="#">Pricing</a></li>
+            <li><a href="#">Documentation</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Careers</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Terms</a></li>
+            <li><a href="#">Security</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2023 SmartDataHub. All rights reserved.</p>
+      <div class="social-links">
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-linkedin"></i></a>
+        <a href="#"><i class="fab fa-github"></i></a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

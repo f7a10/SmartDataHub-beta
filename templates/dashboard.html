@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SmartDataHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="logo">
+            <i class="fas fa-chart-bar"></i>
+            <h1>SmartDataHub</h1>
+        </div>
+        <div class="user-menu">
+            <span>Welcome, {{ username }}</span>
+            <div class="dropdown">
+                <button class="user-button"><i class="fas fa-user-circle"></i></button>
+                <div class="dropdown-content">
+                    <a href="#"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="{{ url_for('main.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Content -->
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active"><a href="#"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="#" id="savedChartsLink"><i class="fas fa-chart-pie"></i> Saved Charts</a></li>
+                    <li><a href="#" id="reportsLink"><i class="fas fa-file-alt"></i> Reports</a></li>
+                    <li><a href="#" id="conversationsLink"><i class="fas fa-comments"></i> Conversations</a></li>
+                    <li><a href="#"><i class="fas fa-question-circle"></i> Help</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-section upload-section">
+                <div class="section-header">
+                    <h2>Upload Your Data</h2>
+                    <p>Upload your data files to get started with analysis</p>
+                </div>
+                <div class="upload-container">
+                    <div class="file-upload-area" id="dropZone">
+                        <input type="file" id="fileInput" class="hidden-input" multiple accept=".csv,.xlsx,.xls,.json,.txt">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt fa-3x"></i>
+                        </div>
+                        <div class="file-label">
+                            <p>Drag & drop files here or <span>browse</span></p>
+                            <div class="file-type-hint">Accepted file types: CSV, Excel, JSON, TXT</div>
+                        </div>
+                    </div>
+                    <div class="file-list" id="fileList"></div>
+                    <button class="btn-analyze" id="analyzeBtn" disabled>
+                        <i class="fas fa-chart-line"></i> Analyze Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Chat box positioned below file upload -->
+            <div class="content-section ai-chat-section" id="aiChatSection">
+                <div class="section-header">
+                    <h2>AI Assistant</h2>
+                    <p>Ask questions about your data and get instant insights</p>
+                </div>
+                <div class="ai-chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Welcome message will be inserted here by JavaScript -->
+                    </div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chatInput" placeholder="Ask a question about your data...">
+                        <button id="sendMessageBtn"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                    <div class="suggested-prompts" id="suggestedPrompts">
+                        <!-- Suggested prompts will be inserted here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Section (Hidden initially) -->
+            <div class="content-section dashboard-analysis-section" id="dashboardSection" style="display: none;">
+                <div class="dashboard-header">
+                    <h2>Data Analysis</h2>
+                    <div class="dashboard-actions">
+                        <button class="btn-filter"><i class="fas fa-filter"></i> Filter</button>
+                        <button class="btn-export" id="exportReportBtn"><i class="fas fa-file-export"></i> Export Report</button>
+                    </div>
+                </div>
+
+                <!-- Data Metrics -->
+                <div class="metrics-grid" id="metricsGrid">
+                    <!-- Metrics will be populated by JavaScript -->
+                </div>
+
+                <!-- Chart Selection -->
+                <div class="chart-selection-header">
+                    <h3>Available Visualizations</h3>
+                    <p>Select charts to visualize your data</p>
+                </div>
+                <div class="chart-selection-grid" id="chartSelectionGrid">
+                    <!-- Chart selection boxes will be populated by JavaScript -->
+                </div>
+
+                <!-- Charts Container -->
+                <div class="selected-charts-container" id="selectedChartsContainer">
+                    <h3>Selected Visualizations</h3>
+                    <div class="charts-grid" id="chartsGrid">
+                        <!-- Selected charts will be displayed here -->
+                    </div>
+                </div>
+
+                <!-- AI Insights Section -->
+                <div class="ai-insights-section" id="aiInsightsSection">
+                    <h3><i class="fas fa-robot"></i> AI Insights</h3>
+                    <div class="ai-insights-content" id="aiInsightsContent">
+                        <!-- AI insights will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saved Charts Section (Hidden initially) -->
+            <div class="content-section saved-charts-section" id="savedChartsSection" style="display: none;">
+                <div class="section-header">
+                    <h2>Saved Charts</h2>
+                    <p>View and manage your saved visualizations</p>
+                </div>
+                <div class="saved-charts-grid" id="savedChartsGrid">
+                    <!-- Saved charts will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Reports Section (Hidden initially) -->
+            <div class="content-section reports-section" id="reportsSection" style="display: none;">
+                <div class="section-header">
+                    <h2>Reports</h2>
+                    <p>View and download your generated reports</p>
+                </div>
+                <div class="reports-list" id="reportsList">
+                    <!-- Reports will be populated by JavaScript -->
+                </div>
+                <div class="create-report-container">
+                    <h3>Create New Report</h3>
+                    <form id="createReportForm">
+                        <div class="form-group">
+                            <label for="reportTitle">Report Title</label>
+                            <input type="text" id="reportTitle" required placeholder="Enter report title">
+                        </div>
+                        <div class="form-group">
+                            <label for="reportDescription">Description (optional)</label>
+                            <textarea id="reportDescription" placeholder="Enter report description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Select Charts to Include</label>
+                            <div class="chart-selection-for-report" id="chartSelectionForReport">
+                                <!-- Chart checkboxes will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-generate-report">Generate Report</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Conversations Section (Hidden initially) -->
+            <div class="content-section conversations-section" id="conversationsSection" style="display: none;">
+                <div class="section-header">
+                    <h2>AI Conversations</h2>
+                    <p>View your previous conversations with the AI assistant</p>
+                </div>
+                <div class="conversations-list" id="conversationsList">
+                    <!-- Conversations will be populated by JavaScript -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Report Generation Modal -->
+    <div class="modal" id="reportModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Generate Report</h2>
+            <div class="report-preview" id="reportPreview">
+                <!-- Report preview will be populated by JavaScript -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel">Cancel</button>
+                <button class="btn-download" id="downloadReportBtn">Download Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Detail Modal -->
+    <div class="modal" id="chartDetailModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="chartDetailTitle">Chart Details</h2>
+            <div class="chart-detail-container" id="chartDetailContainer">
+                <!-- Chart details will be populated by JavaScript -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn-save-chart" id="saveChartBtn">Save Chart</button>
+                <button class="btn-close">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ai_chat.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/reports.js') }}"></script>
+</body>
+</html>
