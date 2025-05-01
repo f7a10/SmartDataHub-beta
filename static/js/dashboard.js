@@ -22,6 +22,12 @@ document.addEventListener('DOMContentLoaded', function() {
         'conversations': document.getElementById('conversationsSection')
     };
     
+    // Add click listener to the Dashboard link in the sidebar
+    document.querySelector('.sidebar-nav li:first-child a').addEventListener('click', function(e) {
+        e.preventDefault();
+        showSection('dashboard');
+    });
+    
     // Session data
     let sessionData = {
         files: [],
