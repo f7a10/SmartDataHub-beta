@@ -538,8 +538,6 @@ def generate_dashboard_data_from_files(processed_data, file_paths, session_id):
                         is_suitable = has_numeric
                     elif chart_type["id"] in ["scatter_plot", "bubble_chart"]:
                         is_suitable = has_multiple_numeric
-                    elif chart_type["id"] in ["heatmap"]:
-                        is_suitable = has_multiple_numeric
                     elif chart_type["id"] in ["radar_chart"]:
                         is_suitable = has_multiple_numeric and has_categorical
                     
@@ -608,8 +606,6 @@ def generate_chart():
             chart_data = visualizer.generate_histogram(df)
         elif chart_type == 'scatter_plot':
             chart_data = visualizer.generate_scatter_plot(df)
-        elif chart_type == 'heatmap':
-            chart_data = visualizer.generate_heatmap(df)
         elif chart_type == 'box_plot':
             chart_data = visualizer.generate_box_plot(df)
         elif chart_type == 'radar_chart':

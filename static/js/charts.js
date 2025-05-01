@@ -90,6 +90,9 @@ class ChartManager {
             dashboardSection.style.display = 'block';
         }
         
+        // Make the dashboard section visible by scrolling to it
+        document.getElementById('analysisSection').scrollIntoView({ behavior: 'smooth' });
+        
         // Create chart container if it doesn't exist
         if (!document.getElementById(`chart-${chartType}`)) {
             const chartsGrid = document.getElementById('chartsGrid');
@@ -179,6 +182,12 @@ class ChartManager {
             return;
         }
         
+        // Scroll to make the chart visible
+        const chartContainer = document.getElementById(`chart-container-${chartType}`);
+        if (chartContainer) {
+            chartContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
         // If chart already exists, destroy it
         if (this.activeCharts[chartType]) {
             this.activeCharts[chartType].destroy();
@@ -239,9 +248,7 @@ class ChartManager {
             case 'scatter_plot':
                 this.renderScatterPlot(canvas, chartData, defaultOptions);
                 break;
-            case 'heatmap':
-                this.renderHeatmap(canvas, chartData);
-                break;
+
             case 'box_plot':
                 this.renderBoxPlot(canvas, chartData, defaultOptions);
                 break;
