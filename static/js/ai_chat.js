@@ -17,8 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initChat();
     
     // Expose functions to global namespace
-    window.AIChat.resetChat = resetChat;
-    window.AIChat.loadConversations = loadConversations;
+    // Don't expose individual functions, we'll expose the whole object at the end
     
     // Main functions
     function initChat() {
@@ -508,6 +507,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
                 if (data.success) {
                     console.log('Conversation saved successfully:', data.conversation_id);
+                    // Set the current conversation ID so we don't try to save it again
+                    currentConversationId = data.conversation_id;
+                    
+                    // Reload the conversations list to show the new conversation
+                    if (typeof loadConversations === 'function') {
+                        loadConversations();
+                    }
                     return true;
                 } else {
                     console.error('Error saving conversation:', data.error);
