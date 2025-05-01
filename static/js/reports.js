@@ -22,8 +22,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Load reports list
-    async function loadReports() {
+    // Load reports list - exposing globally for navigation
+    window.loadReports = async function() {
         if (!reportsList) return;
         
         reportsList.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading reports...</div>';
@@ -42,7 +42,10 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error loading reports:', error);
             reportsList.innerHTML = '<div class="error-state">Error loading reports</div>';
         }
-    }
+    };
+    
+    // Local reference
+    const loadReports = window.loadReports;
     
     // Display reports list
     function displayReportsList(reports) {

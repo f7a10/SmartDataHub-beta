@@ -86,7 +86,10 @@ document.addEventListener('DOMContentLoaded', function() {
         conversationsLink.addEventListener('click', function(e) {
             e.preventDefault();
             showSection('conversations');
-            loadConversations();
+            // Call the loadConversations function from AIChat
+            if (window.AIChat && window.AIChat.loadConversations) {
+                window.AIChat.loadConversations();
+            }
         });
         
         // Export report button
@@ -440,7 +443,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Show section and hide others
-    function showSection(sectionName) {
+    // Make showSection globally available
+    window.showSection = function(sectionName) {
         // Update active state in sidebar
         const navItems = document.querySelectorAll('.sidebar-nav li');
         navItems.forEach(item => item.classList.remove('active'));
@@ -477,6 +481,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (mainSections[sectionName]) {
             mainSections[sectionName].style.display = 'block';
         }
+    };
+    
+    // Local reference for internal use
+    function showSection(sectionName) {
+        window.showSection(sectionName);
     }
     
     // Open export report modal

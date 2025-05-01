@@ -265,6 +265,151 @@ document.addEventListener('DOMContentLoaded', function() {
         return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
     
+    // Load past conversations
+    async function loadConversations() {
+        const conversationsList = document.getElementById('conversationsList');
+        if (!conversationsList) return;
+        
+        conversationsList.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading conversations...</div>';
+        
+        try {
+            const response = await fetch('/api/conversations');
+            const data = await response.json();
+            
+            if (data.success && data.conversations) {
+                displayConversations(data.conversations);
+            } else {
+                conversationsList.innerHTML = '<div class="empty-state">No conversations found</div>';
+            }
+        } catch (error) {
+            console.error('Error loading conversations:', error);
+            conversationsList.innerHTML = '<div class="error-state">Error loading conversations</div>';
+        }
+    }
+    
+    // Display conversations
+    function displayConversations(conversations) {
+        const conversationsList = document.getElementById('conversationsList');
+        conversationsList.innerHTML = '';
+        
+        if (conversations.length === 0) {
+            conversationsList.innerHTML = '<div class="empty-state">No conversations found</div>';
+            return;
+        }
+        
+        conversations.forEach(conversation => {
+            const conv = document.createElement('div');
+            conv.className = 'conversation-item';
+            
+            // Use title or the first few words of the first message
+            const title = conversation.title || 
+                (conversation.messages && conversation.messages.length > 0 ? 
+                conversation.messages[0].content.substring(0, 30) + '...' : 
+                'Conversation ' + conversation.id);
+            
+            conv.innerHTML = `
+                <div class="conversation-header">
+                    <div class="conversation-title">${title}</div>
+                    <div class="conversation-date">${new Date(conversation.created_at).toLocaleDateString()}</div>
+                </div>
+                <div class="conversation-preview">
+                    ${conversation.messages && conversation.messages.length > 0 ? 
+                    `${conversation.messages.length} message${conversation.messages.length !== 1 ? 's' : ''}` : 
+                    'No messages'}
+                </div>
+                <div class="conversation-actions">
+                    <button class="view-conversation-btn" data-id="${conversation.id}">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                    <button class="delete-conversation-btn" data-id="${conversation.id}">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            `;
+            
+            conversationsList.appendChild(conv);
+            
+            // Add event listeners
+            conv.querySelector('.view-conversation-btn').addEventListener('click', () => {
+                viewConversation(conversation.id);
+            });
+            
+            conv.querySelector('.delete-conversation-btn').addEventListener('click', () => {
+                deleteConversation(conversation.id, conv);
+            });
+        });
+    }
+    
+    // View conversation
+    async function viewConversation(conversationId) {
+        try {
+            const response = await fetch(`/api/conversations/${conversationId}`);
+            const data = await response.json();
+            
+            if (data.success && data.conversation) {
+                // Clear current chat
+                chatMessages.innerHTML = '';
+                
+                // Set current conversation
+                currentConversationId = conversationId;
+                
+                // Display messages
+                if (data.conversation.messages && data.conversation.messages.length > 0) {
+                    data.conversation.messages.forEach(message => {
+                        addMessage(message.content, message.is_user);
+                    });
+                }
+                
+                // Show chat section
+                showSection('dashboard');
+                document.getElementById('aiChatSection').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert('Error loading conversation: ' + (data.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error viewing conversation:', error);
+            alert('Network error occurred');
+        }
+    }
+    
+    // Delete conversation
+    async function deleteConversation(conversationId, convElement) {
+        if (!confirm('Are you sure you want to delete this conversation?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/conversations/${conversationId}`, {
+                method: 'DELETE'
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                convElement.remove();
+                
+                // If we deleted the current conversation, reset
+                if (currentConversationId === conversationId) {
+                    currentConversationId = null;
+                    chatMessages.innerHTML = '';
+                    loadWelcomeMessage();
+                }
+            } else {
+                alert('Error deleting conversation: ' + (data.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error deleting conversation:', error);
+            alert('Network error occurred');
+        }
+    }
+    
+    // Show a specific section (helper function)
+    function showSection(sectionName) {
+        if (window.showSection) {
+            window.showSection(sectionName);
+        }
+    }
+    
     // Public methods
     window.AIChat = {
         // Add a message programmatically
@@ -276,6 +421,9 @@ document.addEventListener('DOMContentLoaded', function() {
         sendPrompt: function(prompt) {
             chatInput.value = prompt;
             sendMessage();
-        }
+        },
+        
+        // Load conversations
+        loadConversations: loadConversations
     };
 });

@@ -1,5 +1,6 @@
 // Charts.js - Handles chart creation and management
 
+// Define the ChartManager class
 class ChartManager {
     constructor() {
         // Store active charts
