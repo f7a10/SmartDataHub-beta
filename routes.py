@@ -268,6 +268,9 @@ def upload_files():
     try:
         # Check if we should clear previous files
         clear_previous = request.form.get('clear_previous', 'false').lower() == 'true'
+        # Force clear_previous to True to ensure we get fresh analysis for every upload
+        # This ensures we don't have stale data when uploading new files
+        clear_previous = True
         logger.debug(f"Clear previous files flag: {clear_previous}")
         
         # Check if any files were uploaded
@@ -298,6 +301,17 @@ def upload_files():
             # Generate a new session ID
             session['session_id'] = str(uuid.uuid4())
             logger.info(f"Created new session_id: {session['session_id']}")
+            
+            # Also create a new conversation for fresh context
+            if current_user.is_authenticated:
+                try:
+                    conversation = Conversation(user_id=current_user.id, title=f"Analysis {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+                    db.session.add(conversation)
+                    db.session.commit()
+                    session['current_conversation_id'] = conversation.id
+                    logger.info(f"Created new conversation ID: {conversation.id} for fresh analysis")
+                except Exception as e:
+                    logger.error(f"Error creating new conversation: {str(e)}")
 
         # List to store saved files
         saved_files = []

@@ -46,6 +46,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // File input change event
         fileInput.addEventListener('change', handleFileSelection);
         
+        // New Analysis button
+        const newAnalysisBtn = document.getElementById('newAnalysisBtn');
+        if (newAnalysisBtn) {
+            newAnalysisBtn.addEventListener('click', startNewAnalysis);
+        }
+        
         // File drop zone events
         dropZone.addEventListener('dragover', function(e) {
             e.preventDefault();
