@@ -618,9 +618,18 @@ def process_files_directly(file_paths, combine_files=False):
 
     return results
 
-def generate_dashboard_data_from_files(processed_data, file_paths, session_id):
+def generate_dashboard_data_from_files(processed_data, file_paths, session_id, combine_files=False):
     """
     Generate dashboard data based on processed files.
+    
+    Args:
+        processed_data: Dictionary with processed data information
+        file_paths: List of paths to files
+        session_id: Current session ID
+        combine_files: Whether files were combined for analysis
+        
+    Returns:
+        Dictionary with dashboard data
     """
     dashboard_data = {
         "metrics": {},
@@ -630,20 +639,36 @@ def generate_dashboard_data_from_files(processed_data, file_paths, session_id):
     
     try:
         # Extract metrics
+        is_combined = processed_data.get("combined", False)
         total_rows = 0
         total_columns = 0
+        unique_columns = set()
         file_count = len(file_paths)
         
-        for file_name, file_info in processed_data.get("data", {}).items():
-            if "shape" in file_info:
-                total_rows += file_info["shape"]["rows"]
-                total_columns += file_info["shape"]["columns"]
-                
+        # Get file metrics differently based on whether data is combined or not
+        if is_combined:
+            # For combined analysis, metrics are already aggregated
+            combined_info = processed_data.get("data", {}).get("combined_data", {})
+            if "shape" in combined_info:
+                total_rows = combined_info["shape"]["rows"]
+                total_columns = combined_info["shape"]["columns"]
+                unique_columns = set(combined_info.get("columns", []))
+        else:
+            # For individual file analysis, sum up metrics
+            for file_name, file_info in processed_data.get("data", {}).items():
+                if "shape" in file_info:
+                    total_rows += file_info["shape"]["rows"]
+                    total_columns += len(file_info.get("columns", []))
+                    unique_columns.update(file_info.get("columns", []))
+        
+        # Create metrics object for dashboard
         dashboard_data["metrics"] = {
             "file_count": file_count,
             "total_rows": total_rows,
-            "total_columns": total_columns,
-            "session_id": session_id
+            "total_columns": total_columns if is_combined else len(unique_columns),
+            "unique_columns": len(unique_columns),
+            "session_id": session_id,
+            "combined_analysis": is_combined
         }
         
         # Generate chart options

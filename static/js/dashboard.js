@@ -33,7 +33,9 @@ document.addEventListener('DOMContentLoaded', function() {
         files: [],
         metrics: {},
         chartOptions: [],
-        sessionId: null
+        sessionId: null,
+        selectedFileIndices: [],
+        combineFiles: false
     };
     
     // Initialize event listeners
@@ -104,6 +106,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Clear file list if this is a new upload
         if (sessionData.files.length === 0) {
             fileList.innerHTML = '';
+            // Reset selected files and combined flag
+            sessionData.selectedFileIndices = [];
+            sessionData.combineFiles = false;
         }
         
         // Process each file
@@ -127,39 +132,164 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Add file to session data
             sessionData.files.push(file);
+            const fileIndex = sessionData.files.length - 1;
+            
+            // Add to selected indices by default
+            sessionData.selectedFileIndices.push(fileIndex);
             
             // Create file item element
             const fileItem = document.createElement('div');
             fileItem.className = 'file-item';
             fileItem.innerHTML = `
+                <div class="file-select">
+                    <input type="checkbox" id="file-select-${fileIndex}" class="file-checkbox" data-index="${fileIndex}" checked>
+                </div>
                 <div class="file-name">${file.name}</div>
-                <button class="delete-file" data-file="${file.name}">
+                <button class="delete-file" data-file="${file.name}" data-index="${fileIndex}">
                     <i class="fas fa-times"></i>
                 </button>
             `;
             fileList.appendChild(fileItem);
             
+            // Add checkbox event
+            const checkbox = fileItem.querySelector('.file-checkbox');
+            checkbox.addEventListener('change', function() {
+                const index = parseInt(this.getAttribute('data-index'));
+                if (this.checked) {
+                    // Add to selected indices
+                    if (!sessionData.selectedFileIndices.includes(index)) {
+                        sessionData.selectedFileIndices.push(index);
+                    }
+                } else {
+                    // Remove from selected indices
+                    sessionData.selectedFileIndices = sessionData.selectedFileIndices.filter(i => i !== index);
+                }
+                
+                // Update analyze button state
+                updateAnalyzeButtonState();
+            });
+            
             // Add delete button event
             fileItem.querySelector('.delete-file').addEventListener('click', function() {
                 const fileName = this.getAttribute('data-file');
-                removeFile(fileName, fileItem);
+                const index = parseInt(this.getAttribute('data-index'));
+                removeFile(fileName, fileItem, index);
             });
         }
         
+        // Add file analysis controls if multiple files
+        if (sessionData.files.length > 1 && !document.getElementById('file-analysis-controls')) {
+            addFileAnalysisControls();
+        }
+        
         // Enable analyze button if files are present
-        analyzeBtn.disabled = sessionData.files.length === 0;
+        updateAnalyzeButtonState();
+    }
+    
+    // Add controls for file analysis options
+    function addFileAnalysisControls() {
+        const controlsContainer = document.createElement('div');
+        controlsContainer.id = 'file-analysis-controls';
+        controlsContainer.className = 'file-analysis-controls';
+        controlsContainer.innerHTML = `
+            <div class="control-group">
+                <label class="control-label">
+                    <input type="checkbox" id="combine-files-checkbox">
+                    Combine files for analysis
+                </label>
+                <div class="control-help">When checked, all files will be combined for analysis</div>
+            </div>
+            <div class="control-group">
+                <button id="select-all-files" class="btn-sm">Select All</button>
+                <button id="deselect-all-files" class="btn-sm">Deselect All</button>
+            </div>
+        `;
+        
+        // Insert after file list
+        fileList.parentNode.insertBefore(controlsContainer, fileList.nextSibling);
+        
+        // Add event listeners
+        const combineCheckbox = document.getElementById('combine-files-checkbox');
+        combineCheckbox.addEventListener('change', function() {
+            sessionData.combineFiles = this.checked;
+        });
+        
+        // Select all files
+        document.getElementById('select-all-files').addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('.file-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+                const index = parseInt(checkbox.getAttribute('data-index'));
+                if (!sessionData.selectedFileIndices.includes(index)) {
+                    sessionData.selectedFileIndices.push(index);
+                }
+            });
+            updateAnalyzeButtonState();
+        });
+        
+        // Deselect all files
+        document.getElementById('deselect-all-files').addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('.file-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            sessionData.selectedFileIndices = [];
+            updateAnalyzeButtonState();
+        });
+    }
+    
+    // Update analyze button state
+    function updateAnalyzeButtonState() {
+        analyzeBtn.disabled = sessionData.selectedFileIndices.length === 0;
     }
     
     // Remove file from list
-    function removeFile(fileName, fileItem) {
+    function removeFile(fileName, fileItem, index) {
         // Remove from session data
         sessionData.files = sessionData.files.filter(file => file.name !== fileName);
+        
+        // Remove from selected indices
+        sessionData.selectedFileIndices = sessionData.selectedFileIndices.filter(i => i !== index);
         
         // Remove from UI
         fileItem.remove();
         
-        // Disable analyze button if no files are left
-        analyzeBtn.disabled = sessionData.files.length === 0;
+        // Remove file analysis controls if only one file left
+        if (sessionData.files.length <= 1 && document.getElementById('file-analysis-controls')) {
+            document.getElementById('file-analysis-controls').remove();
+            sessionData.combineFiles = false;
+        }
+        
+        // Update file indices in the UI
+        updateFileIndices();
+        
+        // Update analyze button state
+        updateAnalyzeButtonState();
+    }
+    
+    // Update file indices in the UI after removing a file
+    function updateFileIndices() {
+        const fileItems = document.querySelectorAll('.file-item');
+        fileItems.forEach((item, newIndex) => {
+            const checkbox = item.querySelector('.file-checkbox');
+            const deleteBtn = item.querySelector('.delete-file');
+            
+            if (checkbox) {
+                checkbox.id = `file-select-${newIndex}`;
+                checkbox.setAttribute('data-index', newIndex);
+            }
+            
+            if (deleteBtn) {
+                deleteBtn.setAttribute('data-index', newIndex);
+            }
+        });
+        
+        // Update selected indices
+        const newSelectedIndices = [];
+        document.querySelectorAll('.file-checkbox:checked').forEach(checkbox => {
+            newSelectedIndices.push(parseInt(checkbox.getAttribute('data-index')));
+        });
+        sessionData.selectedFileIndices = newSelectedIndices;
     }
     
     // Analyze data
@@ -169,35 +299,42 @@ document.addEventListener('DOMContentLoaded', function() {
         analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
         
         try {
-            // First, upload the files
-            const uploadResult = await uploadFiles(sessionData.files);
-            
-            if (uploadResult.success) {
-                // Store session id
-                sessionData.sessionId = uploadResult.session_id;
+            // First, upload the files if not already done
+            if (!sessionData.sessionId) {
+                const uploadResult = await uploadFiles(sessionData.files);
                 
-                // Now, analyze the uploaded files
-                const analysisResult = await fetchAnalysis(sessionData.sessionId);
-                
-                if (analysisResult.success) {
-                    // Store data in session
-                    sessionData.metrics = analysisResult.metrics || {};
-                    sessionData.chartOptions = analysisResult.chart_options || [];
-                    
-                    // Update UI with results
-                    displayAnalysisResults(analysisResult);
+                if (uploadResult.success) {
+                    // Store session id
+                    sessionData.sessionId = uploadResult.session_id;
                 } else {
-                    showNotification('Error analyzing files: ' + (analysisResult.error || 'Unknown error'), 'error');
+                    showNotification('Error uploading files: ' + (uploadResult.error || 'Unknown error'), 'error');
+                    return;
                 }
+            }
+            
+            // Now, analyze the uploaded files with options
+            const analysisResult = await fetchAnalysis(
+                sessionData.sessionId, 
+                sessionData.selectedFileIndices,
+                sessionData.combineFiles
+            );
+            
+            if (analysisResult.success) {
+                // Store data in session
+                sessionData.metrics = analysisResult.metrics || {};
+                sessionData.chartOptions = analysisResult.chart_options || [];
+                
+                // Update UI with results
+                displayAnalysisResults(analysisResult);
             } else {
-                showNotification('Error uploading files: ' + (uploadResult.error || 'Unknown error'), 'error');
+                showNotification('Error analyzing files: ' + (analysisResult.error || 'Unknown error'), 'error');
             }
         } catch (error) {
             console.error('Error during analysis:', error);
             showNotification('An error occurred during analysis', 'error');
         } finally {
             // Reset button state
-            analyzeBtn.disabled = false;
+            analyzeBtn.disabled = sessionData.selectedFileIndices.length === 0;
             analyzeBtn.innerHTML = '<i class="fas fa-chart-line"></i> Analyze Data';
         }
     }
