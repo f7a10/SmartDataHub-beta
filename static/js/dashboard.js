@@ -388,21 +388,32 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fetch analysis results
     async function fetchAnalysis(sessionId, fileIndices = [], combineFiles = false) {
         try {
-            // Build URL with parameters
-            let url = `/analyze?session_id=${sessionId}`;
+            // Create data object for POST request
+            const requestData = {
+                session_id: sessionId,
+                combine_files: combineFiles
+            };
             
             // Add file indices if provided
             if (fileIndices && fileIndices.length > 0) {
-                url += `&file_indices=${fileIndices.join(',')}`;
+                requestData.file_indices = fileIndices;
             }
             
-            // Add combine flag if true
-            if (combineFiles) {
-                url += '&combine=true';
-            }
+            console.log('Fetching analysis with data:', requestData);
             
-            const response = await fetch(url);
-            return await response.json();
+            // Use POST method to avoid URL length limitations and encoding issues
+            const response = await fetch('/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+            
+            const data = await response.json();
+            console.log('Analysis response:', data);
+            
+            return data;
         } catch (error) {
             console.error('Error fetching analysis:', error);
             return { success: false, error: 'Network error occurred' };

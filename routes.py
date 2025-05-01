@@ -653,6 +653,9 @@ def generate_dashboard_data_from_files(processed_data, file_paths, session_id, c
     Returns:
         Dictionary with dashboard data
     """
+    logger.info(f"Generating dashboard data from {len(file_paths)} files")
+    logger.debug(f"Processed data keys: {processed_data.keys()}")
+    
     dashboard_data = {
         "metrics": {},
         "chart_options": [],
@@ -667,31 +670,75 @@ def generate_dashboard_data_from_files(processed_data, file_paths, session_id, c
         unique_columns = set()
         file_count = len(file_paths)
         
+        logger.debug(f"Processing metrics with is_combined={is_combined}, file_count={file_count}")
+        
+        # Check if we have any data to process
+        if "data" not in processed_data or not processed_data["data"]:
+            logger.warning("No data found in processed_data")
+            # Provide minimal metrics
+            dashboard_data["metrics"] = {
+                "file_count": file_count,
+                "total_rows": 0,
+                "total_columns": 0,
+                "unique_columns": 0,
+                "session_id": session_id,
+                "combined_analysis": is_combined
+            }
+            return dashboard_data
+            
         # Get file metrics differently based on whether data is combined or not
         if is_combined:
             # For combined analysis, metrics are already aggregated
             combined_info = processed_data.get("data", {}).get("combined_data", {})
+            logger.debug(f"Combined info keys: {combined_info.keys() if combined_info else 'None'}")
+            
             if "shape" in combined_info:
-                total_rows = combined_info["shape"]["rows"]
-                total_columns = combined_info["shape"]["columns"]
+                shape_info = combined_info["shape"]
+                logger.debug(f"Shape info: {shape_info}")
+                total_rows = shape_info.get("rows", 0)
+                total_columns = shape_info.get("columns", 0)
                 unique_columns = set(combined_info.get("columns", []))
+                logger.info(f"Combined metrics: rows={total_rows}, cols={total_columns}, unique_cols={len(unique_columns)}")
+            else:
+                logger.warning("No shape information found in combined data")
         else:
             # For individual file analysis, sum up metrics
+            logger.debug(f"Data keys in processed_data: {processed_data.get('data', {}).keys()}")
+            
             for file_name, file_info in processed_data.get("data", {}).items():
+                # Skip the combined_data key if it exists but we're in individual mode
+                if file_name == "combined_data":
+                    continue
+                    
+                logger.debug(f"Processing file metrics for {file_name}")
+                
                 if "shape" in file_info:
-                    total_rows += file_info["shape"]["rows"]
-                    total_columns += len(file_info.get("columns", []))
-                    unique_columns.update(file_info.get("columns", []))
+                    file_rows = file_info["shape"].get("rows", 0)
+                    file_cols = file_info["shape"].get("columns", 0)
+                    file_columns = file_info.get("columns", [])
+                    
+                    total_rows += file_rows
+                    total_columns = max(total_columns, file_cols)  # Using max for total columns
+                    unique_columns.update(file_columns)
+                    
+                    logger.debug(f"File {file_name}: rows={file_rows}, cols={file_cols}, columns={len(file_columns)}")
+                else:
+                    logger.warning(f"No shape information found for file {file_name}")
+            
+            logger.info(f"Individual metrics: rows={total_rows}, cols={total_columns}, unique_cols={len(unique_columns)}")
         
         # Create metrics object for dashboard
-        dashboard_data["metrics"] = {
+        metrics = {
             "file_count": file_count,
             "total_rows": total_rows,
-            "total_columns": total_columns if is_combined else len(unique_columns),
+            "total_columns": total_columns,  # Use actual column count
             "unique_columns": len(unique_columns),
             "session_id": session_id,
             "combined_analysis": is_combined
         }
+        
+        logger.info(f"Final metrics: {metrics}")
+        dashboard_data["metrics"] = metrics
         
         # Generate chart options
         chart_options = []
