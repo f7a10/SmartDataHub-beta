@@ -158,22 +158,7 @@ def dashboard():
     # Get user's recent conversations
     recent_conversations = Conversation.query.filter_by(user_id=current_user.id).order_by(Conversation.created_at.desc()).limit(5).all()
     
-    # Get user stats for profile display
-    uploads_count = Upload.query.filter_by(user_id=current_user.id).count()
-    charts_count = SavedChart.query.filter_by(user_id=current_user.id).count()
-    conversations_count = Conversation.query.filter_by(user_id=current_user.id).count()
-    
-    # Format created_at date
-    created_at = current_user.created_at.strftime('%B %d, %Y') if hasattr(current_user, 'created_at') and current_user.created_at else 'N/A'
-    
-    return render_template('dashboard.html', 
-                          username=current_user.username, 
-                          email=current_user.email,
-                          recent_conversations=recent_conversations,
-                          created_at=created_at,
-                          uploads_count=uploads_count,
-                          charts_count=charts_count,
-                          conversations_count=conversations_count)
+    return render_template('dashboard.html', username=current_user.username, recent_conversations=recent_conversations)
 
 @main.route('/api/login', methods=['POST'])
 def api_login():
