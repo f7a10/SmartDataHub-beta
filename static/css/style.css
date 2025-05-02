@@ -640,7 +640,14 @@ button {
     box-shadow: var(--box-shadow);
     border: 1px solid var(--border-color);
     padding: 2rem;
-    margin-bottom: H2rem;
+    margin-bottom: 2rem;
+}
+
+/* Light mode content section styling */
+.light-mode .content-section {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+    border: 1px solid rgba(168, 85, 247, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .upload-container {
@@ -909,6 +916,11 @@ button {
     font-size: 0.95rem;
 }
 
+.light-mode .chat-input-container input {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
 .chat-input-container input:focus {
     outline: none;
     border-color: var(--primary-color);
@@ -1024,6 +1036,12 @@ button {
     transition: var(--transition);
     position: relative;
     overflow: hidden;
+}
+
+.light-mode .metric-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(168, 85, 247, 0.1);
 }
 
 .metric-card::before {
@@ -1213,6 +1231,12 @@ button {
     padding: 1.8rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
     border: 1px solid rgba(168, 85, 247, 0.15);
+}
+
+.light-mode .ai-insights-section {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(168, 85, 247, 0.1);
 }
 
 .ai-insights-section h3 {
