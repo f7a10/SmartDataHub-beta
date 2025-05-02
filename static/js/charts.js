@@ -9,15 +9,72 @@ class ChartManager {
         this.chartData = {};
         // Store chart options
         this.chartOptions = [];
-        // Chart colors
-        this.colors = {
-            primary: '#a855f7',
-            secondary: '#7928ca',
-            background: 'rgba(168, 85, 247, 0.2)',
-            border: 'rgba(121, 40, 202, 0.8)',
-            gridLines: 'rgba(255, 255, 255, 0.1)',
-            text: '#d1d5db'
-        };
+        
+        // Set colors based on current mode
+        this.initColors();
+        
+        // Listen for theme changes
+        document.addEventListener('themeChanged', () => {
+            this.initColors();
+            this.updateAllCharts();
+        });
+    }
+    
+    // Initialize colors based on current theme
+    initColors() {
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        
+        // Color palettes for dark and light mode
+        if (isDarkMode) {
+            this.colors = {
+                primary: '#a855f7',
+                secondary: '#7928ca',
+                background: 'rgba(168, 85, 247, 0.2)',
+                border: 'rgba(121, 40, 202, 0.8)',
+                gridLines: 'rgba(255, 255, 255, 0.1)',
+                text: '#d1d5db',
+                // Colorful palette for datasets
+                palette: [
+                    'rgba(168, 85, 247, 0.7)',   // Purple
+                    'rgba(79, 209, 197, 0.7)',   // Teal
+                    'rgba(245, 158, 11, 0.7)',   // Amber
+                    'rgba(239, 68, 68, 0.7)',    // Red
+                    'rgba(16, 185, 129, 0.7)',   // Green
+                    'rgba(59, 130, 246, 0.7)',   // Blue
+                    'rgba(236, 72, 153, 0.7)',   // Pink
+                    'rgba(124, 58, 237, 0.7)'    // Violet
+                ]
+            };
+        } else {
+            this.colors = {
+                primary: '#8b5cf6',
+                secondary: '#6d28d9',
+                background: 'rgba(139, 92, 246, 0.2)',
+                border: 'rgba(109, 40, 217, 0.8)',
+                gridLines: 'rgba(0, 0, 0, 0.1)',
+                text: '#4b5563',
+                // Colorful palette for datasets
+                palette: [
+                    'rgba(109, 40, 217, 0.7)',   // Violet
+                    'rgba(6, 182, 212, 0.7)',    // Cyan
+                    'rgba(234, 88, 12, 0.7)',    // Orange
+                    'rgba(220, 38, 38, 0.7)',    // Red
+                    'rgba(5, 150, 105, 0.7)',    // Emerald
+                    'rgba(37, 99, 235, 0.7)',    // Blue
+                    'rgba(219, 39, 119, 0.7)',   // Pink
+                    'rgba(91, 33, 182, 0.7)'     // Purple
+                ]
+            };
+        }
+    }
+    
+    // Update all active charts with new colors
+    updateAllCharts() {
+        for (const chartType in this.activeCharts) {
+            if (this.chartData[chartType]) {
+                this.renderChart(chartType, this.chartData[chartType]);
+            }
+        }
     }
 
     // Initialize chart options based on API response
@@ -340,15 +397,21 @@ class ChartManager {
                 return;
             }
             
+            // Get datasets and apply color palette
+            const datasets = (chartData.datasets || []).map((dataset, index) => {
+                const colorIndex = index % this.colors.palette.length;
+                return {
+                    ...dataset,
+                    borderColor: dataset.borderColor || this.colors.palette[colorIndex],
+                    backgroundColor: dataset.backgroundColor || this.colors.palette[colorIndex].replace('0.7', '0.2')
+                };
+            });
+            
             this.activeCharts['line_chart'] = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: chartData.labels || [],
-                    datasets: (chartData.datasets || []).map(dataset => ({
-                        ...dataset,
-                        borderColor: dataset.borderColor || this.colors.primary,
-                        backgroundColor: dataset.backgroundColor || this.colors.background
-                    }))
+                    datasets: datasets
                 },
                 options: options
             });
@@ -368,16 +431,22 @@ class ChartManager {
                 return;
             }
             
+            // Apply color palette to datasets
+            const datasets = (chartData.datasets || []).map((dataset, index) => {
+                const colorIndex = index % this.colors.palette.length;
+                return {
+                    ...dataset,
+                    backgroundColor: dataset.backgroundColor || this.colors.palette[colorIndex],
+                    borderColor: dataset.borderColor || this.colors.palette[colorIndex].replace('0.7', '0.9'),
+                    borderWidth: dataset.borderWidth || 1
+                };
+            });
+            
             this.activeCharts['bar_chart'] = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: chartData.labels || [],
-                    datasets: (chartData.datasets || []).map(dataset => ({
-                        ...dataset,
-                        backgroundColor: dataset.backgroundColor || this.colors.primary,
-                        borderColor: dataset.borderColor || this.colors.border,
-                        borderWidth: dataset.borderWidth || 1
-                    }))
+                    datasets: datasets
                 },
                 options: options
             });
@@ -391,11 +460,31 @@ class ChartManager {
     renderPieChart(canvas, chartData) {
         const ctx = canvas.getContext('2d');
         
+        // Apply color palette to datasets
+        const datasets = chartData.datasets.map(dataset => {
+            // Generate colors for each segment using our palette
+            const backgroundColors = [];
+            const borderColors = [];
+            
+            for (let i = 0; i < chartData.labels.length; i++) {
+                const colorIndex = i % this.colors.palette.length;
+                backgroundColors.push(this.colors.palette[colorIndex]);
+                borderColors.push(this.colors.palette[colorIndex].replace('0.7', '0.9'));
+            }
+            
+            return {
+                ...dataset,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 1
+            };
+        });
+        
         this.activeCharts['pie_chart'] = new Chart(ctx, {
             type: 'pie',
             data: {
                 labels: chartData.labels,
-                datasets: chartData.datasets
+                datasets: datasets
             },
             options: {
                 responsive: true,
@@ -447,16 +536,22 @@ class ChartManager {
             }
         };
         
+        // Apply color palette to datasets
+        const datasets = chartData.datasets.map((dataset, index) => {
+            const colorIndex = index % this.colors.palette.length;
+            return {
+                ...dataset,
+                backgroundColor: dataset.backgroundColor || this.colors.palette[colorIndex],
+                borderColor: dataset.borderColor || this.colors.palette[colorIndex].replace('0.7', '0.9'),
+                borderWidth: dataset.borderWidth || 1
+            };
+        });
+        
         this.activeCharts['histogram'] = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: chartData.labels,
-                datasets: chartData.datasets.map(dataset => ({
-                    ...dataset,
-                    backgroundColor: dataset.backgroundColor || this.colors.primary,
-                    borderColor: dataset.borderColor || this.colors.border,
-                    borderWidth: dataset.borderWidth || 1
-                }))
+                datasets: datasets
             },
             options: histogramOptions
         });
@@ -466,14 +561,21 @@ class ChartManager {
     renderScatterPlot(canvas, chartData, options) {
         const ctx = canvas.getContext('2d');
         
+        // Apply color palette to datasets
+        const datasets = chartData.datasets.map((dataset, index) => {
+            const colorIndex = index % this.colors.palette.length;
+            return {
+                ...dataset,
+                backgroundColor: dataset.backgroundColor || this.colors.palette[colorIndex],
+                borderColor: dataset.borderColor || this.colors.palette[colorIndex].replace('0.7', '0.9'),
+                borderWidth: dataset.borderWidth || 1
+            };
+        });
+        
         this.activeCharts['scatter_plot'] = new Chart(ctx, {
             type: 'scatter',
             data: {
-                datasets: chartData.datasets.map(dataset => ({
-                    ...dataset,
-                    backgroundColor: dataset.backgroundColor || this.colors.primary,
-                    borderColor: dataset.borderColor || this.colors.border
-                }))
+                datasets: datasets
             },
             options: options
         });
@@ -607,12 +709,13 @@ class ChartManager {
         // Register boxplot elements and controller if needed
         if (!Chart.controllers.boxplot) {
             // Fall back to a bar chart to display min, median, max
-            const datasets = chartData.datasets.map(dataset => {
+            const datasets = chartData.datasets.map((dataset, index) => {
                 const boxData = dataset.data[0];
+                const colorIndex = index % this.colors.palette.length;
                 return {
                     label: dataset.label,
-                    backgroundColor: dataset.backgroundColor || this.colors.background,
-                    borderColor: dataset.borderColor || this.colors.border,
+                    backgroundColor: dataset.backgroundColor || this.colors.palette[colorIndex].replace('0.7', '0.5'),
+                    borderColor: dataset.borderColor || this.colors.palette[colorIndex].replace('0.7', '0.9'),
                     borderWidth: 1,
                     data: [boxData.median],
                     minBar: boxData.min,
@@ -649,11 +752,21 @@ class ChartManager {
             });
         } else {
             // Use actual boxplot plugin if available
+            // Apply color palette 
+            const datasets = chartData.datasets.map((dataset, index) => {
+                const colorIndex = index % this.colors.palette.length;
+                return {
+                    ...dataset,
+                    backgroundColor: dataset.backgroundColor || this.colors.palette[colorIndex].replace('0.7', '0.5'),
+                    borderColor: dataset.borderColor || this.colors.palette[colorIndex].replace('0.7', '0.9')
+                };
+            });
+            
             this.activeCharts['box_plot'] = new Chart(ctx, {
                 type: 'boxplot',
                 data: {
                     labels: ['Box Plot'],
-                    datasets: chartData.datasets
+                    datasets: datasets
                 },
                 options: {
                     responsive: true,
@@ -667,15 +780,26 @@ class ChartManager {
     renderRadarChart(canvas, chartData) {
         const ctx = canvas.getContext('2d');
         
+        // Apply color palette to datasets
+        const datasets = chartData.datasets.map((dataset, index) => {
+            const colorIndex = index % this.colors.palette.length;
+            return {
+                ...dataset,
+                backgroundColor: dataset.backgroundColor || this.colors.palette[colorIndex].replace('0.7', '0.3'),
+                borderColor: dataset.borderColor || this.colors.palette[colorIndex].replace('0.7', '0.9'),
+                borderWidth: 2
+            };
+        });
+        
+        // Adjust scale colors based on dark/light mode
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+        
         this.activeCharts['radar_chart'] = new Chart(ctx, {
             type: 'radar',
             data: {
                 labels: chartData.labels,
-                datasets: chartData.datasets.map(dataset => ({
-                    ...dataset,
-                    backgroundColor: dataset.backgroundColor || this.colors.background,
-                    borderColor: dataset.borderColor || this.colors.primary
-                }))
+                datasets: datasets
             },
             options: {
                 responsive: true,
@@ -691,10 +815,10 @@ class ChartManager {
                 scales: {
                     r: {
                         angleLines: {
-                            color: 'rgba(255, 255, 255, 0.1)'
+                            color: gridColor
                         },
                         grid: {
-                            color: 'rgba(255, 255, 255, 0.1)'
+                            color: gridColor
                         },
                         pointLabels: {
                             color: this.colors.text
