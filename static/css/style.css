@@ -1275,6 +1275,12 @@ button {
     transition: var(--transition);
 }
 
+.light-mode .saved-chart-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(168, 85, 247, 0.1);
+}
+
 .saved-chart-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
@@ -1344,6 +1350,12 @@ button {
     border: 1px solid var(--border-color);
     transition: var(--transition);
     margin-bottom: 1rem;
+}
+
+.light-mode .report-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(168, 85, 247, 0.1);
 }
 
 .report-card:hover {
@@ -1430,6 +1442,12 @@ button {
     border: 1px solid rgba(168, 85, 247, 0.15);
 }
 
+.light-mode .create-report-container {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(168, 85, 247, 0.1);
+}
+
 .create-report-container h3 {
     font-size: 1.3rem;
     margin-bottom: 1.5rem;
@@ -1455,6 +1473,11 @@ button {
     background-color: rgba(30, 32, 50, 0.7);
     color: var(--text-primary);
     font-size: 0.95rem;
+}
+
+.light-mode .form-group input, .light-mode .form-group textarea {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(168, 85, 247, 0.2);
 }
 
 .form-group textarea {
@@ -1530,6 +1553,12 @@ button {
     transition: var(--transition);
 }
 
+.light-mode .conversation-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(168, 85, 247, 0.1);
+}
+
 .conversation-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
@@ -1570,6 +1599,10 @@ button {
     width: 100%;
     height: 50px;
     background: linear-gradient(rgba(30, 32, 50, 0), rgba(30, 32, 50, 1));
+}
+
+.light-mode .conversation-preview::after {
+    background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
 }
 
 .conversation-footer {
@@ -1622,6 +1655,12 @@ button {
     border: 1px solid var(--border-color);
 }
 
+.light-mode .modal-content {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(248, 250, 252, 0.97));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(168, 85, 247, 0.1);
+}
+
 .close-modal {
     position: absolute;
     top: 1rem;
@@ -1654,6 +1693,11 @@ button {
     border: 1px solid var(--border-color);
 }
 
+.light-mode .report-preview {
+    background-color: rgba(248, 250, 252, 0.5);
+    border: 1px solid rgba(168, 85, 247, 0.1);
+}
+
 .modal-actions {
     display: flex;
     justify-content: flex-end;
@@ -1671,9 +1715,18 @@ button {
     transition: var(--transition);
 }
 
+.light-mode .btn-cancel, .light-mode .btn-close {
+    background-color: rgba(248, 250, 252, 0.8);
+    border: 1px solid rgba(168, 85, 247, 0.1);
+}
+
 .btn-cancel:hover, .btn-close:hover {
     background-color: rgba(40, 42, 60, 0.7);
     color: var(--text-primary);
+}
+
+.light-mode .btn-cancel:hover, .light-mode .btn-close:hover {
+    background-color: rgba(248, 250, 252, 0.95);
 }
 
 .btn-download, .btn-save-chart {
