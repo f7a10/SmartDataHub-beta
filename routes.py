@@ -158,7 +158,10 @@ def dashboard():
     # Get user's recent conversations
     recent_conversations = Conversation.query.filter_by(user_id=current_user.id).order_by(Conversation.created_at.desc()).limit(5).all()
     
-    return render_template('dashboard.html', username=current_user.username, recent_conversations=recent_conversations)
+    return render_template('dashboard.html', 
+                          username=current_user.username, 
+                          email=current_user.email,
+                          recent_conversations=recent_conversations)
 
 @main.route('/api/login', methods=['POST'])
 def api_login():

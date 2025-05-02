@@ -21,11 +21,16 @@
         </div>
         <div class="user-menu">
             <span>Welcome, {{ username }}</span>
+            <button id="themeSwitcher" class="theme-switch-btn"><i class="fas fa-moon"></i></button>
             <div class="dropdown">
                 <button class="user-button"><i class="fas fa-user-circle"></i></button>
                 <div class="dropdown-content">
-                    <a href="#"><i class="fas fa-user"></i> Profile</a>
-                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                    <div class="user-profile-info">
+                        <div class="profile-name">{{ username }}</div>
+                        <div class="profile-email">{{ email }}</div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <a id="toggleThemeLink" href="#"><i class="fas fa-adjust"></i> Toggle Light/Dark</a>
                     <a href="{{ url_for('main.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </div>
             </div>
