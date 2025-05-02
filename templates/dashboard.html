@@ -24,8 +24,8 @@
             <div class="dropdown">
                 <button class="user-button"><i class="fas fa-user-circle"></i></button>
                 <div class="dropdown-content">
-                    <a href="#"><i class="fas fa-user"></i> Profile</a>
-                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="#" id="profileLink"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#" id="toggleDarkMode"><i class="fas fa-moon"></i> Dark Mode</a>
                     <a href="{{ url_for('main.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </div>
             </div>
@@ -218,6 +218,32 @@
             <div class="modal-actions">
                 <button class="btn-save-chart" id="saveChartBtn">Save Chart</button>
                 <button class="btn-close">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Profile Modal -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeProfileModal">&times;</span>
+            <h2>User Profile</h2>
+            <div class="profile-container">
+                <div class="profile-avatar">
+                    <i class="fas fa-user-circle fa-5x"></i>
+                </div>
+                <div class="profile-details">
+                    <div class="profile-info">
+                        <label>Username:</label>
+                        <p id="profileUsername">{{ username }}</p>
+                    </div>
+                    <div class="profile-info">
+                        <label>Email:</label>
+                        <p id="profileEmail">{{ email }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-close" id="closeProfileBtn">Close</button>
             </div>
         </div>
     </div>
