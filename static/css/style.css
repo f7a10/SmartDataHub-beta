@@ -1173,10 +1173,20 @@ button {
     transition: var(--transition);
 }
 
+.light-mode .chart-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(168, 85, 247, 0.1);
+}
+
 .chart-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
     border-color: rgba(168, 85, 247, 0.4);
+}
+
+.light-mode .chart-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .chart-header {
