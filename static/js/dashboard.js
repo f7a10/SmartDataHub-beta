@@ -1,6 +1,39 @@
 // Dashboard.js - Handles the dashboard UI and file upload functionality
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Theme switcher
+    const themeSwitcher = document.getElementById('themeSwitcher');
+    const toggleThemeLink = document.getElementById('toggleThemeLink');
+    
+    // Function to toggle theme
+    function toggleTheme() {
+        document.body.classList.toggle('light-theme');
+        const isDarkTheme = !document.body.classList.contains('light-theme');
+        
+        // Update icon
+        themeSwitcher.innerHTML = isDarkTheme ? 
+            '<i class="fas fa-moon"></i>' : 
+            '<i class="fas fa-sun"></i>';
+            
+        // Save preference
+        localStorage.setItem('darkTheme', isDarkTheme);
+    }
+    
+    // Add event listeners for theme toggling
+    if (themeSwitcher) {
+        themeSwitcher.addEventListener('click', toggleTheme);
+    }
+    
+    if (toggleThemeLink) {
+        toggleThemeLink.addEventListener('click', toggleTheme);
+    }
+    
+    // Check for saved theme preference
+    const prefersDarkTheme = localStorage.getItem('darkTheme') !== 'false';
+    if (!prefersDarkTheme) {
+        toggleTheme(); // Switch to light theme if user preference is light
+    }
+    
     // DOM elements
     const fileInput = document.getElementById('fileInput');
     const dropZone = document.getElementById('dropZone');
