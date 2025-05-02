@@ -1064,6 +1064,15 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.remove('light-mode');
             toggleDarkModeBtn.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
         }
+        
+        // Dispatch initial theme event for components that need to know the current theme
+        setTimeout(() => {
+            document.dispatchEvent(new CustomEvent('themeChanged', {
+                detail: {
+                    theme: document.body.classList.contains('light-mode') ? 'light' : 'dark'
+                }
+            }));
+        }, 100);
     }
     
     // Initialize theme on page load
@@ -1084,6 +1093,13 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.setItem('theme', 'light');
             toggleDarkModeBtn.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
         }
+        
+        // Dispatch a custom event so chart colors can be updated
+        document.dispatchEvent(new CustomEvent('themeChanged', {
+            detail: {
+                theme: document.body.classList.contains('light-mode') ? 'light' : 'dark'
+            }
+        }));
     });
     
     // Profile modal functionality

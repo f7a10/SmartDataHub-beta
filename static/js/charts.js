@@ -849,14 +849,21 @@ class ChartManager {
     renderBubbleChart(canvas, chartData, options) {
         const ctx = canvas.getContext('2d');
         
+        // Apply color palette to datasets
+        const datasets = chartData.datasets.map((dataset, index) => {
+            const colorIndex = index % this.colors.palette.length;
+            return {
+                ...dataset,
+                backgroundColor: dataset.backgroundColor || this.colors.palette[colorIndex].replace('0.7', '0.6'),
+                borderColor: dataset.borderColor || this.colors.palette[colorIndex].replace('0.7', '0.9'),
+                borderWidth: dataset.borderWidth || 1
+            };
+        });
+        
         this.activeCharts['bubble_chart'] = new Chart(ctx, {
             type: 'bubble',
             data: {
-                datasets: chartData.datasets.map(dataset => ({
-                    ...dataset,
-                    backgroundColor: dataset.backgroundColor || this.colors.background,
-                    borderColor: dataset.borderColor || this.colors.border
-                }))
+                datasets: datasets
             },
             options: options
         });
@@ -945,43 +952,220 @@ class ChartManager {
             // Clone chart data to avoid reference issues
             const modalChartData = JSON.parse(JSON.stringify(chartData));
             
+            // Create default chart options with proper colors
+            const defaultOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        grid: {
+                            color: this.colors.gridLines
+                        },
+                        ticks: {
+                            color: this.colors.text
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: this.colors.gridLines
+                        },
+                        ticks: {
+                            color: this.colors.text
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: this.colors.text
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(30, 32, 50, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff'
+                    }
+                }
+            };
+            
             // Create chart based on type
             let chart;
             if (chartType === 'bar_chart') {
+                // Apply color palette to datasets for bar chart
+                if (modalChartData.datasets) {
+                    modalChartData.datasets = modalChartData.datasets.map((dataset, index) => {
+                        const colorIndex = index % this.colors.palette.length;
+                        return {
+                            ...dataset,
+                            backgroundColor: dataset.backgroundColor || this.colors.palette[colorIndex],
+                            borderColor: dataset.borderColor || this.colors.palette[colorIndex].replace('0.7', '0.9')
+                        };
+                    });
+                }
+                
                 chart = new Chart(ctx, {
                     type: 'bar',
                     data: modalChartData,
-                    options: this.chartOptions.bar
+                    options: defaultOptions
                 });
             } else if (chartType === 'line_chart') {
+                // Apply color palette to datasets for line chart
+                if (modalChartData.datasets) {
+                    modalChartData.datasets = modalChartData.datasets.map((dataset, index) => {
+                        const colorIndex = index % this.colors.palette.length;
+                        return {
+                            ...dataset,
+                            borderColor: dataset.borderColor || this.colors.palette[colorIndex],
+                            backgroundColor: dataset.backgroundColor || this.colors.palette[colorIndex].replace('0.7', '0.2')
+                        };
+                    });
+                }
+                
                 chart = new Chart(ctx, {
                     type: 'line',
                     data: modalChartData,
-                    options: this.chartOptions.line
+                    options: defaultOptions
                 });
             } else if (chartType === 'pie_chart') {
+                // Apply color palette to datasets for pie chart
+                if (modalChartData.datasets) {
+                    modalChartData.datasets = modalChartData.datasets.map(dataset => {
+                        // Generate colors for each segment
+                        const backgroundColors = [];
+                        const borderColors = [];
+                        
+                        for (let i = 0; i < (modalChartData.labels?.length || 0); i++) {
+                            const colorIndex = i % this.colors.palette.length;
+                            backgroundColors.push(this.colors.palette[colorIndex]);
+                            borderColors.push(this.colors.palette[colorIndex].replace('0.7', '0.9'));
+                        }
+                        
+                        return {
+                            ...dataset,
+                            backgroundColor: backgroundColors,
+                            borderColor: borderColors
+                        };
+                    });
+                }
+                
                 chart = new Chart(ctx, {
                     type: 'pie',
                     data: modalChartData,
-                    options: this.chartOptions.pie
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    color: this.colors.text
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(30, 32, 50, 0.8)',
+                                titleColor: '#fff',
+                                bodyColor: '#fff'
+                            }
+                        }
+                    }
                 });
             } else if (chartType === 'scatter_plot') {
+                // Apply color palette to datasets for scatter plot
+                if (modalChartData.datasets) {
+                    modalChartData.datasets = modalChartData.datasets.map((dataset, index) => {
+                        const colorIndex = index % this.colors.palette.length;
+                        return {
+                            ...dataset,
+                            backgroundColor: dataset.backgroundColor || this.colors.palette[colorIndex],
+                            borderColor: dataset.borderColor || this.colors.palette[colorIndex].replace('0.7', '0.9')
+                        };
+                    });
+                }
+                
                 chart = new Chart(ctx, {
                     type: 'scatter',
                     data: modalChartData,
-                    options: this.chartOptions.scatter
+                    options: defaultOptions
                 });
             } else if (chartType === 'radar_chart') {
+                // Apply color palette to datasets for radar chart
+                if (modalChartData.datasets) {
+                    modalChartData.datasets = modalChartData.datasets.map((dataset, index) => {
+                        const colorIndex = index % this.colors.palette.length;
+                        return {
+                            ...dataset,
+                            backgroundColor: dataset.backgroundColor || this.colors.palette[colorIndex].replace('0.7', '0.3'),
+                            borderColor: dataset.borderColor || this.colors.palette[colorIndex].replace('0.7', '0.9')
+                        };
+                    });
+                }
+                
+                // Adjust scale colors based on dark/light mode
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                
                 chart = new Chart(ctx, {
                     type: 'radar',
                     data: modalChartData,
-                    options: this.chartOptions.radar
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        elements: {
+                            line: {
+                                borderWidth: 2
+                            },
+                            point: {
+                                radius: 3
+                            }
+                        },
+                        scales: {
+                            r: {
+                                angleLines: {
+                                    color: gridColor
+                                },
+                                grid: {
+                                    color: gridColor
+                                },
+                                pointLabels: {
+                                    color: this.colors.text
+                                },
+                                ticks: {
+                                    color: this.colors.text,
+                                    backdropColor: 'transparent'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: this.colors.text
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(30, 32, 50, 0.8)',
+                                titleColor: '#fff',
+                                bodyColor: '#fff'
+                            }
+                        }
+                    }
                 });
             } else if (chartType === 'bubble_chart') {
+                // Apply color palette to datasets for bubble chart
+                if (modalChartData.datasets) {
+                    modalChartData.datasets = modalChartData.datasets.map((dataset, index) => {
+                        const colorIndex = index % this.colors.palette.length;
+                        return {
+                            ...dataset,
+                            backgroundColor: dataset.backgroundColor || this.colors.palette[colorIndex].replace('0.7', '0.6'),
+                            borderColor: dataset.borderColor || this.colors.palette[colorIndex].replace('0.7', '0.9')
+                        };
+                    });
+                }
+                
                 chart = new Chart(ctx, {
                     type: 'bubble',
                     data: modalChartData,
-                    options: this.chartOptions.bubble
+                    options: defaultOptions
                 });
             } else {
                 console.error('Unsupported chart type for modal view:', chartType);
