@@ -1046,4 +1046,66 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error creating new session:', error);
         }
     }
+    
+    // Dark mode toggle functionality
+    const toggleDarkModeBtn = document.getElementById('toggleDarkMode');
+    const profileLink = document.getElementById('profileLink');
+    const profileModal = document.getElementById('profileModal');
+    const closeProfileModal = document.getElementById('closeProfileModal');
+    const closeProfileBtn = document.getElementById('closeProfileBtn');
+    
+    // Check for saved theme preference or default to dark mode
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+            toggleDarkModeBtn.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+        } else {
+            document.body.classList.remove('light-mode');
+            toggleDarkModeBtn.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+        }
+    }
+    
+    // Initialize theme on page load
+    initTheme();
+    
+    // Toggle between dark and light mode
+    toggleDarkModeBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        if (document.body.classList.contains('light-mode')) {
+            // Switch to dark mode
+            document.body.classList.remove('light-mode');
+            localStorage.setItem('theme', 'dark');
+            toggleDarkModeBtn.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+        } else {
+            // Switch to light mode
+            document.body.classList.add('light-mode');
+            localStorage.setItem('theme', 'light');
+            toggleDarkModeBtn.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+        }
+    });
+    
+    // Profile modal functionality
+    profileLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        profileModal.style.display = 'block';
+    });
+    
+    // Close profile modal when clicking the X button
+    closeProfileModal.addEventListener('click', function() {
+        profileModal.style.display = 'none';
+    });
+    
+    // Close profile modal when clicking the Close button
+    closeProfileBtn.addEventListener('click', function() {
+        profileModal.style.display = 'none';
+    });
+    
+    // Close profile modal when clicking outside the modal
+    window.addEventListener('click', function(e) {
+        if (e.target === profileModal) {
+            profileModal.style.display = 'none';
+        }
+    });
 });

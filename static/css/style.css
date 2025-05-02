@@ -1,21 +1,36 @@
 /* Base Styles */
 :root {
+    /* Common colors that don't change between themes */
     --primary-color: #a855f7;
     --primary-gradient: linear-gradient(90deg, #a855f7, #7928ca);
     --secondary-color: #6c47d5;
     --accent-color: #9431f0;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Dark mode colors (default) */
     --background-dark: #0f1123;
     --background-light: #1e2032;
     --text-primary: #ffffff;
     --text-secondary: #94a3b8;
     --card-bg: #1f2344;
     --card-hover: #282a46;
-    --success-color: #10b981;
-    --warning-color: #f59e0b;
-    --danger-color: #ef4444;
     --border-color: rgba(168, 85, 247, 0.2);
     --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light mode theme */
+.light-mode {
+    --background-dark: #f8fafc;
+    --background-light: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --card-bg: #ffffff;
+    --card-hover: #f1f5f9;
+    --border-color: rgba(168, 85, 247, 0.3);
+    --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 * {
@@ -1727,4 +1742,54 @@ button {
     .chart-selection-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     }
+}
+
+/* Profile Modal Styles */
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 1rem;
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: var(--card-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--primary-color);
+}
+
+.profile-avatar i {
+    color: var(--primary-color);
+}
+
+.profile-details {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.profile-info label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.profile-info p {
+    padding: 0.8rem;
+    background-color: var(--card-bg);
+    border-radius: 6px;
+    font-size: 1rem;
 }
