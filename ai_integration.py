@@ -80,16 +80,17 @@ class OpenRouterAI:
             prompt = f"""
             You are an expert data analyst AI assistant for DataHub.
 
-            Analyze the following data summary and provide an initial impression:
+            Analyze the following data summary and provide a focused initial analysis:
 
             {json.dumps(data_summary, indent=2)}
 
-            Give a concise, insightful initial analysis that highlights:
-            1. Key metrics and what they indicate
-            2. Notable patterns or trends
-            3. Potential areas of interest for deeper analysis
+            Give a structured, bullet-point analysis that highlights:
+            1. **Key Metrics**: 2-3 important metrics and what they tell us (rows, columns, missing values)
+            2. **Notable Patterns**: 2-3 clear patterns or distributions in the data
+            3. **Areas for Deeper Analysis**: 2-3 specific questions that would yield valuable insights
 
-            Keep your response under 200 words and focus on being helpful and insightful.
+            Format your response with bold headers (**Header**) and bullet points.
+            Be precise and actionable. Maximum 200 words total.
             """
 
             response = self.generate_response(prompt)
@@ -150,20 +151,29 @@ class OpenRouterAI:
 
             # Include system message with context
             system_message = f"""
-            You are an expert data analyst AI assistant for DataHub.
+            You are DataHub's expert data analyst assistant. You provide clear, direct, and actionable answers.
 
             DATA CONTEXT:
             {json.dumps(data_context, indent=2)}
 
-            Provide helpful, accurate, and insightful answers based on the data context.
-            If you cannot answer based on the available data, explain why and suggest what additional data might help.
+            GUIDELINES:
+            1. Be concise and focused - users prefer shorter, precise answers
+            2. Use markdown formatting (bold, bullet points) for better readability
+            3. When showing data, present it in clearly formatted tables/lists
+            4. If suggesting actions, make them specific and actionable
+            5. When answering "how to" questions, provide step-by-step instructions
+            6. Always relate your answers to the specific data uploaded by the user
+            7. Never mention your knowledge cutoff - simply use the data context available to you
+            8. If asked for a visualization, suggest our platform's specific chart types (bar_chart, line_chart, pie_chart, etc.)
+
+            If you cannot answer based on the available data, clearly state what information is missing.
             """
 
             messages.append({"role": "system", "content": system_message})
 
             # Add chat history if available
             if chat_history:
-                for msg in chat_history[-10:]:  # Include last 10 messages for context
+                for msg in chat_history[-8:]:  # Include last 8 messages for context
                     if msg.get("role") in ["user", "assistant"]:
                         messages.append({
                             "role": msg.get("role"),
@@ -213,19 +223,28 @@ class OpenRouterAI:
             logger.info("Generating visualization suggestions")
 
             prompt = f"""
-            You are an expert data visualization AI assistant.
+            You are an expert data visualization AI assistant for DataHub.
 
-            Based on the following data summary, suggest appropriate visualizations:
+            Based on the following data summary, suggest the MOST appropriate visualizations:
 
             {json.dumps(data_summary, indent=2)}
 
-            Return a JSON list of visualization suggestions. Each suggestion should include:
-            1. type: The type of chart (e.g., "line", "bar", "pie", "scatter")
-            2. title: A descriptive title for the chart
-            3. description: Why this visualization would be insightful
-            4. data_fields: Which fields from the data should be used
+            IMPORTANT: Only suggest charts from this limited set of available chart types:
+            - bar_chart: For comparing categorical data
+            - line_chart: For showing trends over time
+            - pie_chart: For showing composition or parts of a whole
+            - scatter_plot: For showing relationship between two variables
+            - box_plot: For showing distribution and outliers
+            - bubble_chart: For showing relationships between 3 variables
+            - radar_chart: For showing multivariate data across multiple axes
+            - histogram: For showing distribution of a single variable
 
-            Only respond with valid JSON. Do not include any other text.
+            Return a JSON list with EXACTLY 3 visualization suggestions. Each suggestion must include:
+            1. type: Must be one of the chart types listed above (e.g., "bar_chart", "line_chart")
+            2. title: A very short descriptive title (5 words max)
+            3. description: One-sentence explanation (15 words max)
+
+            Be extremely concise. Only respond with valid JSON. No explanatory text.
             """
 
             response = self.generate_response(prompt)
@@ -244,12 +263,20 @@ class OpenRouterAI:
                 logger.error(f"Failed to parse AI response as JSON: {response}")
                 logger.error(f"JSON decode error: {str(json_error)}")
                 # Return a default visualization
-                return [{"type": "bar", "title": "Default Visualization", "description": "Basic data overview"}]
+                return [
+                    {"type": "bar_chart", "title": "Data Comparison", "description": "Compare key metrics across categories"},
+                    {"type": "line_chart", "title": "Trend Analysis", "description": "View changes over time"},
+                    {"type": "pie_chart", "title": "Data Distribution", "description": "See breakdown of categories"}
+                ]
 
         except Exception as e:
             logger.error(f"Error suggesting visualizations: {str(e)}")
             logger.error(traceback.format_exc())
-            return [{"type": "bar", "title": "Default Visualization", "description": "Basic data overview"}]
+            return [
+                {"type": "bar_chart", "title": "Data Comparison", "description": "Compare key metrics across categories"},
+                {"type": "line_chart", "title": "Trend Analysis", "description": "View changes over time"},
+                {"type": "pie_chart", "title": "Data Distribution", "description": "See breakdown of categories"}
+            ]
 
     def generate_response(self, prompt: str) -> str:
         """
@@ -304,19 +331,30 @@ class OpenRouterAI:
             logger.info("Generating data story")
 
             prompt = f"""
-            You are an expert data storyteller for DataHub.
+            You are DataHub's expert data storyteller creating accessible, well-formatted insights.
 
-            Based on the following data summary, create a compelling narrative data story:
+            Based on the following data summary, create a concise data story:
 
             {json.dumps(data_summary, indent=2)}
 
-            Your data story should:
-            1. Start with a high-level summary of what the data represents
-            2. Identify 3-5 key insights from the data
-            3. Explain potential business implications
-            4. Suggest follow-up questions or analyses
-
-            Write in a clear, engaging style suitable for business stakeholders.
+            Structure your data story as follows:
+            
+            ## Overview
+            [Provide a very brief 1-2 sentence overview of what this data represents]
+            
+            ## Key Insights
+            - [Insight 1: Focus on most surprising or valuable pattern]
+            - [Insight 2: Highlight relationship between important variables]
+            - [Insight 3: Note any outliers or anomalies worth exploring]
+            
+            ## Business Impact
+            [2-3 sentences on how these insights could drive business decisions]
+            
+            ## Next Steps
+            [Bullet list of 2-3 very specific follow-up analyses]
+            
+            Use markdown formatting for readability. Be concise - aim for 250 words maximum.
+            Focus on actionable insights rather than describing the data itself.
             """
 
             response = self.generate_response(prompt)
