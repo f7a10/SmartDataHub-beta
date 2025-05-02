@@ -1116,6 +1116,12 @@ button {
     text-align: center;
 }
 
+.light-mode .chart-option {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(168, 85, 247, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
 .chart-option:hover {
     background-color: var(--card-hover);
     border-color: var(--primary-color);
@@ -1123,8 +1129,18 @@ button {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
+.light-mode .chart-option:hover {
+    background-color: rgba(139, 92, 246, 0.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
 .chart-option.selected {
     background-color: rgba(168, 85, 247, 0.1);
+    border-color: var(--primary-color);
+}
+
+.light-mode .chart-option.selected {
+    background-color: rgba(139, 92, 246, 0.15);
     border-color: var(--primary-color);
 }
 
@@ -1134,6 +1150,10 @@ button {
     margin-bottom: 1rem;
 }
 
+.light-mode .chart-option-icon {
+    color: #8b5cf6; /* Explicit color for light mode */
+}
+
 .chart-option-name {
     font-weight: 600;
     font-size: 1rem;
@@ -1141,9 +1161,17 @@ button {
     margin-bottom: 0.5rem;
 }
 
+.light-mode .chart-option-name {
+    color: #111827; /* Dark color for better contrast in light mode */
+}
+
 .chart-option-desc {
     font-size: 0.8rem;
     color: var(--text-secondary);
+}
+
+.light-mode .chart-option-desc {
+    color: #4b5563; /* Medium gray for light mode */
 }
 
 /* Charts Grid */
