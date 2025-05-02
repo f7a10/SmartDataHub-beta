@@ -1730,7 +1730,7 @@ button {
 }
 
 /* Light/Dark Theme Switcher and Profile Styles */
-.theme-switch-btn {
+.theme-switch-btn, .profile-btn {
     background: transparent;
     border: none;
     color: var(--text-primary);
@@ -1738,17 +1738,32 @@ button {
     cursor: pointer;
     margin-right: 1rem;
     transition: var(--transition);
-    width: 40px;
     height: 40px;
-    border-radius: 50%;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0 15px;
 }
 
-.theme-switch-btn:hover {
+.theme-switch-btn {
+    width: 40px;
+    padding: 0;
+    border-radius: 50%;
+}
+
+.theme-switch-btn:hover, .profile-btn:hover {
     background-color: rgba(168, 85, 247, 0.2);
     color: var(--primary-color);
+}
+
+.profile-btn {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.profile-btn i {
+    margin-right: 5px;
 }
 
 .user-profile-info {
@@ -1777,19 +1792,36 @@ button {
 
 /* Light Theme Variables */
 body.light-theme {
-    --background-dark: #f8fafc;
+    --background-dark: #f9fafb;
     --background-light: #ffffff;
     --card-bg: #ffffff;
-    --card-hover: #f3f4f6;
+    --card-hover: #f1f5f9;
     --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --border-color: rgba(168, 85, 247, 0.2);
+    --text-secondary: #475569;
+    --border-color: rgba(168, 85, 247, 0.3);
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 body.light-theme .dashboard-header,
 body.light-theme .sidebar {
     background-color: #ffffff;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .content-section {
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(168, 85, 247, 0.15);
+}
+
+body.light-theme .metrics-card {
+    background-color: #ffffff;
+    border: 1px solid rgba(168, 85, 247, 0.15);
+}
+
+body.light-theme .chart-box {
+    background-color: #ffffff;
+    border: 1px solid rgba(168, 85, 247, 0.15);
 }
 
 body.light-theme .sidebar-nav a {
@@ -1799,9 +1831,106 @@ body.light-theme .sidebar-nav a {
 body.light-theme .sidebar-nav a:hover,
 body.light-theme .sidebar-nav li.active a {
     color: var(--primary-color);
+    background-color: rgba(168, 85, 247, 0.08);
 }
 
 body.light-theme .dropdown-content {
     background-color: #ffffff;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(168, 85, 247, 0.15);
+}
+
+/* Profile Modal and Stats */
+.profile-container {
+    display: flex;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: var(--box-shadow);
+}
+
+.profile-image {
+    margin-right: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+}
+
+.profile-details {
+    flex: 1;
+}
+
+.profile-info-row {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.profile-value {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-box {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: var(--box-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.stat-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+body.light-theme .stat-box {
+    background-color: #ffffff;
+    border: 1px solid rgba(168, 85, 247, 0.15);
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .profile-image {
+        margin-right: 0;
+        margin-bottom: 1.5rem;
+    }
+    
+    .profile-stats {
+        grid-template-columns: 1fr;
+    }
 }

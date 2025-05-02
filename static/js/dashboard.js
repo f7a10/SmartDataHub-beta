@@ -34,6 +34,74 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleTheme(); // Switch to light theme if user preference is light
     }
     
+    // Profile button and modal functionality
+    const profileButton = document.getElementById('profileButton');
+    const viewProfileLink = document.getElementById('viewProfileLink');
+    const profileModal = document.getElementById('profileModal');
+    const closeProfileModal = document.getElementById('closeProfileModal');
+    const closeProfileBtn = document.getElementById('closeProfileBtn');
+    const currentTheme = document.getElementById('currentTheme');
+    
+    // Function to update theme display
+    function updateThemeDisplay() {
+        if (currentTheme) {
+            const isDarkTheme = document.body.classList.contains('light-theme') ? false : true;
+            currentTheme.textContent = isDarkTheme ? 'Dark Mode' : 'Light Mode';
+        }
+    }
+    
+    // Call once to initialize
+    updateThemeDisplay();
+    
+    // Update theme display when theme changes
+    document.addEventListener('themeChanged', updateThemeDisplay);
+    
+    // Function to open profile modal
+    function openProfileModal() {
+        if (profileModal) {
+            profileModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+            
+            // Update theme display
+            updateThemeDisplay();
+        }
+    }
+    
+    // Function to close profile modal
+    function closeProfileModal() {
+        if (profileModal) {
+            profileModal.style.display = 'none';
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+    }
+    
+    // Add event listeners for profile modal
+    if (profileButton) {
+        profileButton.addEventListener('click', openProfileModal);
+    }
+    
+    if (viewProfileLink) {
+        viewProfileLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            openProfileModal();
+        });
+    }
+    
+    if (closeProfileModal) {
+        closeProfileModal.addEventListener('click', closeProfileModal);
+    }
+    
+    if (closeProfileBtn) {
+        closeProfileBtn.addEventListener('click', closeProfileModal);
+    }
+    
+    // Close modal on outside click
+    window.addEventListener('click', function(e) {
+        if (e.target === profileModal) {
+            closeProfileModal();
+        }
+    });
+    
     // DOM elements
     const fileInput = document.getElementById('fileInput');
     const dropZone = document.getElementById('dropZone');

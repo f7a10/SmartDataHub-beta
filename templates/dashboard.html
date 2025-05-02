@@ -22,6 +22,7 @@
         <div class="user-menu">
             <span>Welcome, {{ username }}</span>
             <button id="themeSwitcher" class="theme-switch-btn"><i class="fas fa-moon"></i></button>
+            <button id="profileButton" class="profile-btn"><i class="fas fa-id-card"></i> Profile</button>
             <div class="dropdown">
                 <button class="user-button"><i class="fas fa-user-circle"></i></button>
                 <div class="dropdown-content">
@@ -30,6 +31,7 @@
                         <div class="profile-email">{{ email }}</div>
                     </div>
                     <div class="dropdown-divider"></div>
+                    <a id="viewProfileLink" href="#"><i class="fas fa-id-card"></i> View Profile</a>
                     <a id="toggleThemeLink" href="#"><i class="fas fa-adjust"></i> Toggle Light/Dark</a>
                     <a href="{{ url_for('main.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </div>
@@ -223,6 +225,54 @@
             <div class="modal-actions">
                 <button class="btn-save-chart" id="saveChartBtn">Save Chart</button>
                 <button class="btn-close">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeProfileModal">&times;</span>
+            <h2>User Profile</h2>
+            <div class="profile-container">
+                <div class="profile-image">
+                    <i class="fas fa-user-circle fa-5x"></i>
+                </div>
+                <div class="profile-details">
+                    <div class="profile-info-row">
+                        <span class="profile-label">Username:</span>
+                        <span class="profile-value">{{ username }}</span>
+                    </div>
+                    <div class="profile-info-row">
+                        <span class="profile-label">Email:</span>
+                        <span class="profile-value">{{ email }}</span>
+                    </div>
+                    <div class="profile-info-row">
+                        <span class="profile-label">Member Since:</span>
+                        <span class="profile-value">{{ created_at }}</span>
+                    </div>
+                    <div class="profile-info-row">
+                        <span class="profile-label">Theme Preference:</span>
+                        <span class="profile-value" id="currentTheme">Dark Mode</span>
+                    </div>
+                </div>
+            </div>
+            <div class="profile-stats">
+                <div class="stat-box">
+                    <div class="stat-number" id="totalUploads">{{ uploads_count }}</div>
+                    <div class="stat-label">Files Uploaded</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="totalCharts">{{ charts_count }}</div>
+                    <div class="stat-label">Charts Created</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="totalConversations">{{ conversations_count }}</div>
+                    <div class="stat-label">AI Conversations</div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-close" id="closeProfileBtn">Close</button>
             </div>
         </div>
     </div>
