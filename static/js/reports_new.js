@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // DOM elements
     const reportsList = document.getElementById('reportsList');
     const reportFileSelection = document.getElementById('reportFileSelection');
+    const reportUploadArea = document.getElementById('reportUploadArea');
+    const reportFileInput = document.getElementById('reportFileInput');
     const availableChartsGrid = document.getElementById('availableChartsGrid');
     const selectedChartsGrid = document.getElementById('selectedChartsGrid');
     const reportAiChat = document.getElementById('reportAiChat');
@@ -23,7 +25,8 @@ document.addEventListener('DOMContentLoaded', function() {
             audience: 'general'
         },
         aiChat: [],
-        reportContent: ''
+        reportContent: '',
+        uploadedFiles: [] // Track newly uploaded files
     };
     
     // Initialize reports functionality
@@ -45,6 +48,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById(`${tabId}-tab`).classList.add('active');
             });
         });
+        
+        // File upload initialization
+        initializeFileUpload();
         
         // Step navigation
         setupStepNavigation();
@@ -75,6 +81,107 @@ document.addEventListener('DOMContentLoaded', function() {
         if (downloadReportBtn) {
             downloadReportBtn.addEventListener('click', downloadCurrentReport);
         }
+    }
+    
+    // Initialize file upload functionality
+    function initializeFileUpload() {
+        if (!reportUploadArea || !reportFileInput) return;
+        
+        // Handle file input change
+        reportFileInput.addEventListener('change', handleFileSelect);
+        
+        // Handle drag and drop
+        reportUploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.add('drag-over');
+        });
+        
+        reportUploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove('drag-over');
+        });
+        
+        reportUploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                uploadFiles(files);
+            }
+        });
+        
+        // Handle click on upload area
+        reportUploadArea.addEventListener('click', function() {
+            reportFileInput.click();
+        });
+    }
+    
+    // Handle file select from input
+    function handleFileSelect(e) {
+        const files = e.target.files;
+        if (files.length > 0) {
+            uploadFiles(files);
+        }
+    }
+    
+    // Upload files to server
+    async function uploadFiles(files) {
+        // Show loading state
+        reportFileSelection.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Uploading files...</div>';
+        
+        const formData = new FormData();
+        
+        // Add all files to form data
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
+        
+        try {
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Refresh file list with newly uploaded files
+                loadFilesForReportCreation();
+                
+                // Show success message
+                showNotification('Files uploaded successfully', 'success');
+            } else {
+                reportFileSelection.innerHTML = `
+                    <div class="error-state">
+                        <p>Error: ${data.error || 'Failed to upload files'}</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error uploading files:', error);
+            reportFileSelection.innerHTML = '<div class="error-state">Network error while uploading files</div>';
+        }
+    }
+    
+    // Show notification
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.classList.add('fade-out');
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 3000);
     }
     
     // Setup step navigation
