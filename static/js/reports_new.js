@@ -601,7 +601,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     prompt: userPrompt,
                     chart_ids: reportState.selectedCharts,
                     file_indices: reportState.selectedFiles,
-                    audience: reportState.reportDetails.audience,
                     title: reportState.reportDetails.title,
                     description: reportState.reportDetails.description
                 })
@@ -719,8 +718,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     title: reportState.reportDetails.title,
                     description: reportState.reportDetails.description,
                     chart_ids: reportState.selectedCharts,
-                    content: reportState.reportContent,
-                    audience: reportState.reportDetails.audience
+                    content: reportState.reportContent
                 }),
             });
             
@@ -734,8 +732,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 reportState.selectedCharts = [];
                 reportState.reportDetails = {
                     title: '',
-                    description: '',
-                    audience: 'general'
+                    description: ''
                 };
                 reportState.aiChat = [];
                 reportState.reportContent = '';

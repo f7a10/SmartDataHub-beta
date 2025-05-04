@@ -1180,6 +1180,116 @@ def get_conversation(conversation_id):
         logger.error(traceback.format_exc())
         return jsonify({"success": False, "error": str(e)}), 500
 
+@main.route('/api/report/ai-generate', methods=['POST'])
+@login_required
+def report_ai_generate():
+    """
+    Use AI to generate a report based on selected charts and user prompt.
+    """
+    try:
+        data = request.get_json()
+        prompt = data.get('prompt', '')
+        chart_ids = data.get('chart_ids', [])
+        file_indices = data.get('file_indices', [])
+        title = data.get('title', '')
+        description = data.get('description', '')
+        
+        if not prompt:
+            return jsonify({"success": False, "error": "No prompt provided"}), 400
+            
+        if not chart_ids:
+            return jsonify({"success": False, "error": "No charts selected"}), 400
+            
+        # Get the charts
+        charts = []
+        for chart_id in chart_ids:
+            chart = SavedChart.query.filter_by(id=chart_id, user_id=current_user.id).first()
+            if chart:
+                chart_data = json.loads(chart.chart_data)
+                chart_config = json.loads(chart.chart_config) if chart.chart_config else {}
+                charts.append({
+                    "id": chart.id,
+                    "title": chart.chart_title,
+                    "type": chart.chart_type,
+                    "data": chart_data,
+                    "config": chart_config
+                })
+        
+        # Get session data if available
+        data_summary = None
+        if 'session_id' in session and file_indices:
+            session_id = session['session_id']
+            # Get files from the session
+            upload_folder = current_app.config.get('UPLOAD_FOLDER', 'uploads')
+            session_folder = os.path.join(upload_folder, session_id)
+            
+            if os.path.exists(session_folder):
+                # Get all files from database that are active for this session
+                active_uploads = Upload.query.filter_by(
+                    session_id=session_id, 
+                    user_id=current_user.id, 
+                    active=True
+                ).all()
+                
+                all_files = [os.path.join(session_folder, upload.filename) 
+                        for upload in active_uploads 
+                        if os.path.isfile(os.path.join(session_folder, upload.filename))]
+                
+                # Filter files by indices if provided
+                if file_indices:
+                    try:
+                        selected_files = [all_files[i] for i in file_indices if 0 <= i < len(all_files)]
+                        if selected_files:
+                            # Get summaries of the files
+                            processor = DataProcessor()
+                            combine_files = len(selected_files) > 1
+                            data_summary = processor.process_file(selected_files[0])
+                    except Exception as e:
+                        logger.error(f"Error processing files: {str(e)}")
+        
+        # Generate report with AI
+        try:
+            ai_client = get_ai_instance()
+            if not ai_client:
+                return jsonify({"success": False, "error": "AI service not available"}), 503
+                
+            # Prepare a better prompt that includes details about the user's request and the selected charts
+            enhanced_prompt = f"""
+            User request: {prompt}
+            
+            Report title: {title if title else 'Not specified'}
+            Report description: {description if description else 'Not specified'}
+            
+            Please create a comprehensive report that addresses the user's request.
+            Focus on insights and patterns in the data represented by the charts.
+            The report should be well-structured with headings and bullet points where appropriate.
+            Use markdown formatting for the report structure.
+            """
+            
+            # Generate the response
+            ai_response = ai_client.chat(enhanced_prompt, chat_history=None, file_data=data_summary)
+            
+            # Generate a more polished report content
+            report_content = f"""
+            # {title or 'Data Analysis Report'}
+            
+            {ai_response}
+            """
+            
+            return jsonify({
+                "success": True,
+                "response": ai_response,
+                "report_content": report_content
+            })
+        except Exception as ai_error:
+            logger.error(f"AI report generation error: {str(ai_error)}")
+            return jsonify({"success": False, "error": f"Error generating AI report: {str(ai_error)}"}), 500
+    
+    except Exception as e:
+        logger.error(f"Exception in report_ai_generate: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @main.route('/api/report/generate', methods=['POST'])
 @login_required
 def generate_report():
