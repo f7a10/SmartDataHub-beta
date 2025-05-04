@@ -239,6 +239,53 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         reportPreview.appendChild(reportHeader);
         
+        // Add report content if available
+        if (report.content) {
+            const contentSection = document.createElement('div');
+            contentSection.className = 'report-content-preview';
+            
+            // Use the marked library for proper Markdown rendering if available
+            if (typeof marked !== 'undefined') {
+                try {
+                    // Configure marked options for better rendering
+                    marked.setOptions({
+                        breaks: true,              // Add <br> on single line breaks
+                        gfm: true,                 // GitHub Flavored Markdown
+                        headerIds: false,          // Don't add IDs to headers (cleaner HTML)
+                        mangle: false,             // Don't mangle email addresses
+                        smartLists: true,          // Use smarter list behavior
+                        smartypants: true,         // Use "smart" typographic punctuation
+                        xhtml: false               // Don't close tags with a slash
+                    });
+                    
+                    // Parse Markdown to HTML
+                    contentSection.innerHTML = marked.parse(report.content);
+                } catch (e) {
+                    console.error('Error parsing Markdown with marked:', e);
+                    // Fall back to basic formatting if marked fails
+                    contentSection.innerHTML = formatBasicMarkdown(report.content);
+                }
+            } else {
+                // Fall back to basic Markdown formatting if marked isn't available
+                contentSection.innerHTML = formatBasicMarkdown(report.content);
+            }
+            
+            reportPreview.appendChild(contentSection);
+        }
+        
+        // Helper function for basic Markdown formatting if marked isn't available
+        function formatBasicMarkdown(content) {
+            return content
+                .replace(/# (.*)/g, '<h1>$1</h1>')
+                .replace(/## (.*)/g, '<h2>$1</h2>')
+                .replace(/### (.*)/g, '<h3>$1</h3>')
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                .replace(/- (.*)/g, '<ul><li>$1</li></ul>')
+                .replace(/<\/ul><ul>/g, '')  // Combine consecutive list items
+                .replace(/\n/g, '<br>');
+        }
+        
         // Add charts section
         if (report.charts && report.charts.length > 0) {
             const chartsSection = document.createElement('div');
@@ -458,6 +505,56 @@ document.addEventListener('DOMContentLoaded', function() {
                 ${report.description ? `<div class="report-description">${report.description}</div>` : ''}
             </div>
         `;
+        
+        // Add report content if available
+        if (report.content) {
+            const contentSection = document.createElement('div');
+            contentSection.className = 'report-content-preview';
+            
+            // Use the marked library for proper Markdown rendering if available
+            if (typeof marked !== 'undefined') {
+                try {
+                    // Configure marked options for PDF
+                    marked.setOptions({
+                        breaks: true,              // Add <br> on single line breaks
+                        gfm: true,                 // GitHub Flavored Markdown
+                        headerIds: false,          // Don't add IDs to headers
+                        mangle: false,             // Don't mangle email addresses
+                        smartLists: true,          // Use smarter list behavior
+                        smartypants: true,         // Use "smart" typographic punctuation
+                        xhtml: false               // Don't close tags with a slash
+                    });
+                    
+                    // Parse Markdown to HTML
+                    contentSection.innerHTML = marked.parse(report.content);
+                } catch (e) {
+                    console.error('Error parsing Markdown for PDF:', e);
+                    // Fall back to basic formatting if marked fails
+                    contentSection.innerHTML = report.content
+                        .replace(/# (.*)/g, '<h1>$1</h1>')
+                        .replace(/## (.*)/g, '<h2>$1</h2>')
+                        .replace(/### (.*)/g, '<h3>$1</h3>')
+                        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                        .replace(/- (.*)/g, '<ul><li>$1</li></ul>')
+                        .replace(/<\/ul><ul>/g, '')
+                        .replace(/\n/g, '<br>');
+                }
+            } else {
+                // Fall back to basic formatting
+                contentSection.innerHTML = report.content
+                    .replace(/# (.*)/g, '<h1>$1</h1>')
+                    .replace(/## (.*)/g, '<h2>$1</h2>')
+                    .replace(/### (.*)/g, '<h3>$1</h3>')
+                    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                    .replace(/- (.*)/g, '<ul><li>$1</li></ul>')
+                    .replace(/<\/ul><ul>/g, '')
+                    .replace(/\n/g, '<br>');
+            }
+            
+            tempContainer.appendChild(contentSection);
+        }
         
         // Add charts section
         if (report.charts && report.charts.length > 0) {

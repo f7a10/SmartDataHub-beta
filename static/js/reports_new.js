@@ -679,8 +679,36 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateReportPreview(content) {
         if (!reportPreviewContent) return;
         
-        // Format content as markdown with basic styling
-        reportPreviewContent.innerHTML = content
+        // Use the marked library for proper Markdown rendering if available
+        if (typeof marked !== 'undefined') {
+            try {
+                // Configure marked options for better rendering
+                marked.setOptions({
+                    breaks: true,              // Add <br> on single line breaks
+                    gfm: true,                 // GitHub Flavored Markdown
+                    headerIds: false,          // Don't add IDs to headers (cleaner HTML)
+                    mangle: false,             // Don't mangle email addresses
+                    smartLists: true,          // Use smarter list behavior
+                    smartypants: true,         // Use "smart" typographic punctuation
+                    xhtml: false               // Don't close tags with a slash
+                });
+                
+                // Parse Markdown to HTML
+                reportPreviewContent.innerHTML = marked.parse(content);
+            } catch (e) {
+                console.error('Error parsing Markdown with marked:', e);
+                // Fall back to basic formatting if marked fails
+                reportPreviewContent.innerHTML = formatBasicMarkdown(content);
+            }
+        } else {
+            // Fall back to basic Markdown formatting if marked isn't available
+            reportPreviewContent.innerHTML = formatBasicMarkdown(content);
+        }
+    }
+    
+    // Helper function for basic Markdown formatting
+    function formatBasicMarkdown(content) {
+        return content
             .replace(/# (.*)/g, '<h1>$1</h1>')
             .replace(/## (.*)/g, '<h2>$1</h2>')
             .replace(/### (.*)/g, '<h3>$1</h3>')
@@ -876,7 +904,39 @@ document.addEventListener('DOMContentLoaded', function() {
         if (report.content) {
             const contentSection = document.createElement('div');
             contentSection.className = 'report-content-preview';
-            contentSection.innerHTML = report.content
+            
+            // Use the marked library for proper Markdown rendering if available
+            if (typeof marked !== 'undefined') {
+                try {
+                    // Configure marked options for better rendering
+                    marked.setOptions({
+                        breaks: true,              // Add <br> on single line breaks
+                        gfm: true,                 // GitHub Flavored Markdown
+                        headerIds: false,          // Don't add IDs to headers (cleaner HTML)
+                        mangle: false,             // Don't mangle email addresses
+                        smartLists: true,          // Use smarter list behavior
+                        smartypants: true,         // Use "smart" typographic punctuation
+                        xhtml: false               // Don't close tags with a slash
+                    });
+                    
+                    // Parse Markdown to HTML
+                    contentSection.innerHTML = marked.parse(report.content);
+                } catch (e) {
+                    console.error('Error parsing Markdown with marked:', e);
+                    // Fall back to basic formatting if marked fails
+                    contentSection.innerHTML = formatBasicMarkdown(report.content);
+                }
+            } else {
+                // Fall back to basic Markdown formatting if marked isn't available
+                contentSection.innerHTML = formatBasicMarkdown(report.content);
+            }
+            
+            reportPreview.appendChild(contentSection);
+        }
+        
+        // Helper function for basic Markdown formatting if marked isn't available
+        function formatBasicMarkdown(content) {
+            return content
                 .replace(/# (.*)/g, '<h1>$1</h1>')
                 .replace(/## (.*)/g, '<h2>$1</h2>')
                 .replace(/### (.*)/g, '<h3>$1</h3>')
@@ -885,7 +945,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 .replace(/- (.*)/g, '<ul><li>$1</li></ul>')
                 .replace(/<\/ul><ul>/g, '')  // Combine consecutive list items
                 .replace(/\n/g, '<br>');
-            reportPreview.appendChild(contentSection);
         }
         
         // Add charts section
