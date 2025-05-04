@@ -1,142 +1,257 @@
-{% extends "base.html" %}
-
-{% block title %}Help & Support - SmartDataHub{% endblock %}
-
-{% block content %}
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="mb-0">Help & Support</h2>
-                </div>
-                <div class="card-body">
-                    <section class="mb-5">
-                        <h3>Contact Information</h3>
-                        <p>Need assistance? We're here to help!</p>
-                        
-                        <div class="d-flex align-items-center mb-3">
-                            <i class="fas fa-envelope me-3 text-primary fa-lg"></i>
-                            <div>
-                                <strong>Email:</strong>
-                                <a href="mailto:smartdatahub3@gmail.com">smartdatahub3@gmail.com</a>
-                            </div>
-                        </div>
-                        
-                        <div class="d-flex align-items-center mb-3">
-                            <i class="fas fa-clock me-3 text-primary fa-lg"></i>
-                            <div>
-                                <strong>Support Hours:</strong>
-                                <span>Monday - Friday, 9 AM - 5 PM EST</span>
-                            </div>
-                        </div>
-                    </section>
-                    
-                    <section class="mb-5">
-                        <h3>Frequently Asked Questions</h3>
-                        
-                        <div class="accordion" id="faqAccordion">
-                            
-                            <div class="accordion-item">
-                                <h4 class="accordion-header" id="faq1">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1Collapse" aria-expanded="false" aria-controls="faq1Collapse">
-                                        How do I upload files?
-                                    </button>
-                                </h4>
-                                <div id="faq1Collapse" class="accordion-collapse collapse" aria-labelledby="faq1" data-bs-parent="#faqAccordion">
-                                    <div class="accordion-body">
-                                        Click on the 'Upload Files' button in the dashboard and select the files you want to analyze. The system will process your files and generate visualizations based on the data.
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="accordion-item">
-                                <h4 class="accordion-header" id="faq2">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2Collapse" aria-expanded="false" aria-controls="faq2Collapse">
-                                        What file formats are supported?
-                                    </button>
-                                </h4>
-                                <div id="faq2Collapse" class="accordion-collapse collapse" aria-labelledby="faq2" data-bs-parent="#faqAccordion">
-                                    <div class="accordion-body">
-                                        We support CSV, Excel (XLSX, XLS), JSON, and text files (TXT, DAT). Our advanced file processing algorithm can handle various encodings and data structures to ensure your data is properly analyzed.
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="accordion-item">
-                                <h4 class="accordion-header" id="faq3">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3Collapse" aria-expanded="false" aria-controls="faq3Collapse">
-                                        How do I create a report?
-                                    </button>
-                                </h4>
-                                <div id="faq3Collapse" class="accordion-collapse collapse" aria-labelledby="faq3" data-bs-parent="#faqAccordion">
-                                    <div class="accordion-body">
-                                        After generating visualizations, select the charts you want to include in your report by clicking on them. Then click the 'Generate Report' button. You can add a title and description to your report before saving it.
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="accordion-item">
-                                <h4 class="accordion-header" id="faq4">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4Collapse" aria-expanded="false" aria-controls="faq4Collapse">
-                                        Can I download my reports?
-                                    </button>
-                                </h4>
-                                <div id="faq4Collapse" class="accordion-collapse collapse" aria-labelledby="faq4" data-bs-parent="#faqAccordion">
-                                    <div class="accordion-body">
-                                        Yes! After creating a report, you can download it in Markdown format. The downloaded report includes AI-generated insights about your data along with references to the visualizations you selected.
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="accordion-item">
-                                <h4 class="accordion-header" id="faq5">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5Collapse" aria-expanded="false" aria-controls="faq5Collapse">
-                                        How does the AI assistant work?
-                                    </button>
-                                </h4>
-                                <div id="faq5Collapse" class="accordion-collapse collapse" aria-labelledby="faq5" data-bs-parent="#faqAccordion">
-                                    <div class="accordion-body">
-                                        Our AI assistant analyzes your uploaded data and can answer questions about patterns, trends, and insights. It uses advanced natural language processing to understand your questions and provide meaningful responses based on your specific data.
-                                    </div>
-                                </div>
-                            </div>
-                            
-                        </div>
-                    </section>
-                    
-                    <section>
-                        <h3>Quick Tips</h3>
-                        <ul class="list-group">
-                            <li class="list-group-item">
-                                <i class="fas fa-lightbulb text-warning me-2"></i>
-                                <strong>Clean Data:</strong> For best results, ensure your data is clean and properly formatted before uploading.
-                            </li>
-                            <li class="list-group-item">
-                                <i class="fas fa-lightbulb text-warning me-2"></i>
-                                <strong>Ask Specific Questions:</strong> When using the AI assistant, be specific with your questions to get more precise insights.
-                            </li>
-                            <li class="list-group-item">
-                                <i class="fas fa-lightbulb text-warning me-2"></i>
-                                <strong>Multiple Charts:</strong> Create comprehensive reports by selecting multiple chart types to visualize different aspects of your data.
-                            </li>
-                            <li class="list-group-item">
-                                <i class="fas fa-lightbulb text-warning me-2"></i>
-                                <strong>Save Your Work:</strong> Remember to save your reports to access them later in your account.
-                            </li>
-                        </ul>
-                    </section>
-                </div>
-                <div class="card-footer bg-light">
-                    <div class="d-flex justify-content-between">
-                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
-                        </a>
-                        <span class="text-muted">Version 1.0.0</span>
-                    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help & Support - SmartDataHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Help page specific styles */
+        .help-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        
+        .help-section {
+            margin-bottom: 3rem;
+        }
+        
+        .help-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+        
+        .help-section h3 {
+            font-size: 1.3rem;
+            margin: 1.5rem 0 0.8rem;
+            color: var(--text-primary);
+        }
+        
+        .help-section p {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        
+        .contact-card {
+            background: linear-gradient(145deg, rgba(30, 32, 50, 0.7), rgba(40, 42, 70, 0.7));
+            border-radius: 16px;
+            border: 1px solid rgba(168, 85, 247, 0.15);
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+        
+        .light-mode .contact-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(168, 85, 247, 0.1);
+        }
+        
+        .contact-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .contact-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .contact-info {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .help-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .help-list li {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .help-list li::before {
+            content: "•";
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            position: absolute;
+            left: 0;
+            top: -0.3rem;
+        }
+        
+        .faq-item {
+            margin-bottom: 1.5rem;
+        }
+        
+        .faq-question {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        
+        .faq-answer {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .contact-card .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-block;
+            text-decoration: none;
+        }
+        
+        .contact-card .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="logo">
+            <i class="fas fa-chart-bar"></i>
+            <h1>SmartDataHub</h1>
+        </div>
+        <div class="user-menu">
+            {% if current_user.is_authenticated %}
+            <span>Welcome, {{ current_user.username }}</span>
+            <div class="dropdown">
+                <button class="user-button"><i class="fas fa-user-circle"></i></button>
+                <div class="dropdown-content">
+                    <a href="#" id="profileLink"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#" id="toggleDarkMode"><i class="fas fa-moon"></i> Dark Mode</a>
+                    <a href="{{ url_for('main.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </div>
             </div>
+            {% else %}
+            <a href="{{ url_for('main.login') }}" class="login-btn">Login</a>
+            {% endif %}
         </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="help-container">
+        <div class="help-section">
+            <h2><i class="fas fa-question-circle"></i> Help & Support</h2>
+            <p>Welcome to the SmartDataHub Help Center. Here you'll find resources to help you get the most out of our platform.</p>
+        </div>
+        
+        <div class="help-section">
+            <h3>Getting Started</h3>
+            <p>SmartDataHub helps you analyze and visualize your data with powerful AI capabilities. Here's how to get started:</p>
+            <ul class="help-list">
+                <li>Upload your data files (CSV, Excel, JSON, TXT) through the dashboard</li>
+                <li>Our AI will automatically analyze the data and suggest visualizations</li>
+                <li>Select charts to view detailed visualizations of your data</li>
+                <li>Save charts that you want to reference later</li>
+                <li>Generate comprehensive reports of your findings</li>
+                <li>Chat with our AI assistant to gain deeper insights</li>
+            </ul>
+        </div>
+        
+        <div class="help-section">
+            <h3>Frequently Asked Questions</h3>
+            
+            <div class="faq-item">
+                <div class="faq-question">What file formats are supported?</div>
+                <div class="faq-answer">SmartDataHub supports CSV, Excel (XLSX, XLS), JSON, and TXT file formats. We recommend structured data formats like CSV and Excel for the best results.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">How does the AI analysis work?</div>
+                <div class="faq-answer">Our AI analyzes your data structure, content, and statistical properties to identify patterns, anomalies, and insights. It then suggests appropriate visualizations and generates natural language explanations of key findings.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Can I export my charts and reports?</div>
+                <div class="faq-answer">Yes, you can export reports in both PDF and Markdown formats. Reports can include any selection of your saved charts along with AI-generated insights about your data.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Is my data secure?</div>
+                <div class="faq-answer">Yes, SmartDataHub takes data security seriously. Your data is encrypted during transmission and storage. We do not share your data with third parties, and you can delete your data at any time.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">What if I need help with specific analysis?</div>
+                <div class="faq-answer">You can chat with our AI assistant directly on the dashboard. For more complex needs, contact our support team via email.</div>
+            </div>
+        </div>
+        
+        <div class="contact-card">
+            <div class="contact-icon">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="contact-title">Need More Help?</div>
+            <div class="contact-info">Email us at <strong>smartdatahub3@gmail.com</strong></div>
+            <a href="mailto:smartdatahub3@gmail.com" class="btn-primary">
+                <i class="fas fa-paper-plane"></i> Send Email
+            </a>
+        </div>
+        
+        <a href="{{ url_for('main.dashboard') }}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
     </div>
-</div>
-{% endblock %}
+    
+    <!-- Scripts -->
+    <script>
+        // Dark mode toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleDarkMode = document.getElementById('toggleDarkMode');
+            if (toggleDarkMode) {
+                toggleDarkMode.addEventListener('click', function() {
+                    document.body.classList.toggle('light-mode');
+                    
+                    // Save preference to localStorage
+                    if (document.body.classList.contains('light-mode')) {
+                        localStorage.setItem('theme', 'light');
+                    } else {
+                        localStorage.setItem('theme', 'dark');
+                    }
+                });
+            }
+            
+            // Check for saved theme preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+            }
+        });
+    </script>
+</body>
+</html>
