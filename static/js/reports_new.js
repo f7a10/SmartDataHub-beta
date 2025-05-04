@@ -1041,7 +1041,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const a = document.createElement('a');
             a.href = url;
-            a.download = `report-${reportId}.md`; // Changed to .md since we're returning markdown
+            a.download = `report-${reportId}.pdf`; // Using .pdf extension for PDF downloads
             document.body.appendChild(a);
             a.click();
             

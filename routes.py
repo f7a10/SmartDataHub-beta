@@ -1690,7 +1690,7 @@ def get_help_info():
             },
             {
                 "question": "Can I download my reports?",
-                "answer": "Yes, after creating a report, you can download it in Markdown format."
+                "answer": "Yes, after creating a report, you can download it in PDF format."
             },
             {
                 "question": "How do I get help?",

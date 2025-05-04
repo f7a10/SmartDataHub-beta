@@ -349,14 +349,14 @@ document.addEventListener('DOMContentLoaded', function() {
             loadingIndicator.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Generating report...</div>';
             document.body.appendChild(loadingIndicator);
             
-            // Use the new download API endpoint that generates Markdown/PDF content
-            const format = 'markdown'; // Default to markdown
+            // Use the new download API endpoint that generates PDF content
+            const format = 'pdf'; // Set to PDF format
             
             try {
                 // Create a hidden anchor element to trigger the download
                 const downloadLink = document.createElement('a');
                 downloadLink.href = `/api/reports/${reportId}/download?format=${format}`;
-                downloadLink.download = `report_${reportId}.md`;
+                downloadLink.download = `report_${reportId}.pdf`;
                 document.body.appendChild(downloadLink);
                 downloadLink.click();
                 document.body.removeChild(downloadLink);
