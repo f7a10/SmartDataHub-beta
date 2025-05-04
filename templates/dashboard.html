@@ -41,7 +41,7 @@
                 <ul>
                     <li class="active"><a href="#"><i class="fas fa-home"></i> Dashboard</a></li>
                     <li><a href="#" id="savedChartsLink"><i class="fas fa-chart-pie"></i> Saved Charts</a></li>
-                    <li><a href="#" id="reportsLink"><i class="fas fa-file-alt"></i> Reports</a></li>
+                    <li><a href="{{ url_for('main.reports') }}" id="reportsLink"><i class="fas fa-file-alt"></i> Reports</a></li>
                     <li><a href="#" id="conversationsLink"><i class="fas fa-comments"></i> Conversations</a></li>
                     <li><a href="{{ url_for('main.help_page') }}"><i class="fas fa-question-circle"></i> Help</a></li>
                 </ul>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - SmartDataHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reports.css') }}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="logo">
+            <i class="fas fa-chart-bar"></i>
+            <h1>SmartDataHub</h1>
+        </div>
+        <div class="user-menu">
+            <span>Welcome, {{ username }}</span>
+            <div class="dropdown">
+                <button class="user-button"><i class="fas fa-user-circle"></i></button>
+                <div class="dropdown-content">
+                    <a href="#" id="profileLink"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#" id="toggleDarkMode"><i class="fas fa-moon"></i> Dark Mode</a>
+                    <a href="{{ url_for('main.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Reports Content -->
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="{{ url_for('main.dashboard') }}"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="#" id="savedChartsLink"><i class="fas fa-chart-pie"></i> Saved Charts</a></li>
+                    <li class="active"><a href="{{ url_for('main.reports') }}"><i class="fas fa-file-alt"></i> Reports</a></li>
+                    <li><a href="#" id="conversationsLink"><i class="fas fa-comments"></i> Conversations</a></li>
+                    <li><a href="{{ url_for('main.help_page') }}"><i class="fas fa-question-circle"></i> Help</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-header">
+                <h2><i class="fas fa-file-alt"></i> Reports</h2>
+            </div>
+
+            <!-- Reports Tabs -->
+            <div class="reports-tabs">
+                <button class="reports-tab-btn active" data-tab="existing-reports">My Reports</button>
+                <button class="reports-tab-btn" data-tab="create-report">Create New Report</button>
+            </div>
+
+            <!-- Existing Reports Tab -->
+            <div id="existing-reports" class="reports-tab-content active">
+                <div class="reports-grid" id="reportsList">
+                    <!-- Reports will be populated dynamically -->
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Loading your reports...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Report Tab -->
+            <div id="create-report" class="reports-tab-content">
+                <div class="create-report-container">
+                    <!-- Step Navigation -->
+                    <div class="report-creation-steps">
+                        <div id="step-1" class="report-step active">
+                            <div class="step-number">1</div>
+                            <div class="step-label">Select Files</div>
+                        </div>
+                        <div id="step-2" class="report-step">
+                            <div class="step-number">2</div>
+                            <div class="step-label">Choose Charts</div>
+                        </div>
+                        <div id="step-3" class="report-step">
+                            <div class="step-number">3</div>
+                            <div class="step-label">Report Details</div>
+                        </div>
+                        <div id="step-4" class="report-step">
+                            <div class="step-number">4</div>
+                            <div class="step-label">AI Assistant</div>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Select Files -->
+                    <div id="step-1-content" class="report-step-content active">
+                        <h3>Select Files for Analysis</h3>
+                        <p>Choose the files you want to include in your report. These files will be analyzed and used to generate insights.</p>
+                        
+                        <div class="report-file-selection" id="reportFileSelection">
+                            <!-- Files will be loaded here dynamically -->
+                            <div class="loading">
+                                <i class="fas fa-spinner fa-spin"></i> Loading files...
+                            </div>
+                        </div>
+
+                        <!-- Step Actions -->
+                        <div class="report-step-actions">
+                            <div></div> <!-- Empty div for flex spacing -->
+                            <button id="step1Next" class="btn-next-step">
+                                <i class="fas fa-arrow-right"></i> Next: Choose Charts
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Select Charts -->
+                    <div id="step-2-content" class="report-step-content">
+                        <h3>Select Charts to Include</h3>
+                        <p>Choose the visualizations you want to include in your report.</p>
+                        
+                        <div class="report-charts-selection">
+                            <div class="report-charts-grid" id="availableChartsGrid">
+                                <!-- Charts will be loaded here dynamically -->
+                                <div class="loading">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading charts...
+                                </div>
+                            </div>
+                            
+                            <div class="report-charts-preview">
+                                <h4>Selected Charts</h4>
+                                <div class="selected-charts-grid" id="selectedChartsGrid">
+                                    <div class="no-selected-charts">No charts selected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step Actions -->
+                        <div class="report-step-actions">
+                            <button id="step2Prev" class="btn-prev-step">
+                                <i class="fas fa-arrow-left"></i> Previous
+                            </button>
+                            <button id="step2Next" class="btn-next-step">
+                                <i class="fas fa-arrow-right"></i> Next: Report Details
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Define Report -->
+                    <div id="step-3-content" class="report-step-content">
+                        <h3>Define Your Report</h3>
+                        <p>Provide details about your report to help organize and identify it later.</p>
+                        
+                        <form id="reportDetailsForm">
+                            <div class="form-group">
+                                <label for="reportTitle">Report Title</label>
+                                <input type="text" id="reportTitle" placeholder="Enter a title for your report">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="reportDescription">Report Description</label>
+                                <textarea id="reportDescription" placeholder="Describe what this report is about"></textarea>
+                            </div>
+                        </form>
+
+                        <!-- Step Actions -->
+                        <div class="report-step-actions">
+                            <button id="step3Prev" class="btn-prev-step">
+                                <i class="fas fa-arrow-left"></i> Previous
+                            </button>
+                            <button id="step3Next" class="btn-next-step">
+                                <i class="fas fa-arrow-right"></i> Next: AI Assistant
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: AI Assistant -->
+                    <div id="step-4-content" class="report-step-content">
+                        <h3>AI Report Generation</h3>
+                        <p>Ask AI to create a professional report based on your selected charts and data.</p>
+                        
+                        <div class="report-ai-interaction">
+                            <div class="report-ai-chat" id="reportAiChat">
+                                <!-- AI chat messages will appear here -->
+                                <div class="report-ai-message ai-message">
+                                    Hello! I'm your AI assistant for report generation. I can help you create a professional report based on your selected charts and data. What kind of insights would you like to focus on?
+                                </div>
+                            </div>
+                            
+                            <div class="report-ai-input-container">
+                                <textarea id="reportAiInput" placeholder="Ask AI to generate a report with specific focus areas..."></textarea>
+                                <button id="sendReportAiRequest" class="btn-send-ai-request">
+                                    <i class="fas fa-robot"></i> Generate with AI
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="report-ai-suggestions">
+                            <h4>Suggested Prompts</h4>
+                            <div class="report-ai-suggestion-pills">
+                                <div class="ai-suggestion-pill">Create an executive summary for business stakeholders</div>
+                                <div class="ai-suggestion-pill">Analyze trends and patterns in the data</div>
+                                <div class="ai-suggestion-pill">Explain key insights from each chart</div>
+                                <div class="ai-suggestion-pill">Suggest next steps based on the data</div>
+                            </div>
+                        </div>
+                        
+                        <div class="report-preview">
+                            <h4>Report Preview</h4>
+                            <div class="report-preview-content" id="reportPreviewContent">
+                                <p>Your report preview will appear here after generation.</p>
+                            </div>
+                        </div>
+
+                        <!-- Step Actions -->
+                        <div class="report-step-actions">
+                            <button id="step4Prev" class="btn-prev-step">
+                                <i class="fas fa-arrow-left"></i> Previous
+                            </button>
+                            <button id="saveReportBtn" class="btn-save-report">
+                                <i class="fas fa-save"></i> Save Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Report Viewing Modal -->
+    <div id="reportPreviewModal" class="report-preview-modal">
+        <div class="report-modal-content">
+            <div class="report-modal-header">
+                <h2 class="report-modal-title">Report Title</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            
+            <div class="report-header-preview">
+                <h2 id="modalReportTitle">Report Title</h2>
+                <p id="modalReportDescription">Report description will appear here.</p>
+            </div>
+            
+            <div class="report-content-preview" id="modalReportContent">
+                <!-- Report content will be displayed here -->
+            </div>
+            
+            <div class="report-charts-preview">
+                <h3>Charts</h3>
+                <div id="modalReportCharts">
+                    <!-- Charts will be rendered here -->
+                </div>
+            </div>
+            
+            <div class="report-modal-actions">
+                <button id="downloadReportBtn" class="btn-download">
+                    <i class="fas fa-download"></i> Download Report
+                </button>
+                <button class="btn-cancel close-report-modal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load JS files -->
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/reports_new.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navigate to dashboard when clicking the dashboard link
+            document.querySelector('#savedChartsLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = "{{ url_for('main.dashboard') }}#saved-charts";
+            });
+            
+            document.querySelector('#conversationsLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = "{{ url_for('main.dashboard') }}#conversations";
+            });
+            
+            // Toggle dark mode
+            document.getElementById('toggleDarkMode').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.body.classList.toggle('dark-mode');
+                localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+                
+                // Update icon
+                const icon = this.querySelector('i');
+                if (icon.classList.contains('fa-moon')) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+            });
+            
+            // Check for saved dark mode preference
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+                const icon = document.getElementById('toggleDarkMode').querySelector('i');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+            
+            // Initialize reports
+            if (typeof initReports === 'function') {
+                initReports();
+            } else {
+                console.error('Reports functionality not loaded properly');
+            }
+        });
+    </script>
+</body>
+</html>

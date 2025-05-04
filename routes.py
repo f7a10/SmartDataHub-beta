@@ -164,6 +164,16 @@ def dashboard():
                            email=current_user.email,
                            recent_conversations=recent_conversations)
 
+@main.route('/reports')
+@login_required
+def reports():
+    """Render the reports page."""
+    logger.info(f"Rendering reports page for user: {current_user.username}")
+    
+    return render_template('reports.html', 
+                          username=current_user.username,
+                          email=current_user.email)
+
 @main.route('/api/login', methods=['POST'])
 def api_login():
     """API endpoint for login."""
