@@ -74,28 +74,132 @@ class DataProcessor:
             # Load based on file type
             if ext == '.csv':
                 try:
-                    df = pd.read_csv(file_path)
-                except UnicodeDecodeError:
-                    df = pd.read_csv(file_path, encoding='latin1')
+                    # Try with different encodings and error handling
+                    for encoding in ['utf-8', 'latin1', 'cp1252']:
+                        try:
+                            df = pd.read_csv(file_path, encoding=encoding, on_bad_lines='skip')
+                            break
+                        except UnicodeDecodeError:
+                            continue
+                        except Exception as e:
+                            logger.warning(f"Error with encoding {encoding}: {str(e)}")
+                    else:
+                        # If all encodings fail, try with a more permissive approach
+                        df = pd.read_csv(file_path, encoding='latin1', on_bad_lines='skip', 
+                                         error_bad_lines=False, warn_bad_lines=True)
+                except Exception as csv_err:
+                    logger.warning(f"CSV read error: {str(csv_err)}")
+                    # Last resort: try to read with engine='python' which can sometimes handle problematic files
+                    df = pd.read_csv(file_path, encoding='latin1', engine='python', on_bad_lines='skip')
+            
             elif ext in ['.xlsx', '.xls']:
-                df = pd.read_excel(file_path)
+                try:
+                    # Try standard Excel read
+                    df = pd.read_excel(file_path)
+                except Exception as excel_err:
+                    logger.warning(f"Excel read error: {str(excel_err)}")
+                    # Try with sheet_name parameter to get first sheet
+                    xl = pd.ExcelFile(file_path)
+                    if len(xl.sheet_names) > 0:
+                        df = pd.read_excel(file_path, sheet_name=xl.sheet_names[0])
+                    else:
+                        raise ValueError("No valid sheets found in Excel file")
+            
             elif ext == '.json':
                 try:
+                    # Standard JSON format
                     df = pd.read_json(file_path)
-                except ValueError:
-                    # Try loading as dictionary if array format fails
-                    with open(file_path, 'r') as f:
-                        data = json.load(f)
-                    if isinstance(data, dict):
-                        df = pd.DataFrame.from_dict(data, orient='index')
-                    else:
-                        df = pd.DataFrame(data)
+                except ValueError as json_err:
+                    logger.warning(f"JSON format error: {str(json_err)}")
+                    # Try multiple approaches for non-standard JSON
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        try:
+                            data = json.load(f)
+                            
+                            # Handle different JSON structures
+                            if isinstance(data, dict):
+                                if any(isinstance(v, dict) for v in data.values()):
+                                    # Nested dictionary - normalize it
+                                    df = pd.json_normalize(data)
+                                else:
+                                    # Simple dictionary
+                                    df = pd.DataFrame.from_dict(data, orient='index')
+                            elif isinstance(data, list):
+                                if all(isinstance(item, dict) for item in data):
+                                    # List of dictionaries
+                                    df = pd.DataFrame(data)
+                                else:
+                                    # List of values
+                                    df = pd.DataFrame(data)
+                            else:
+                                # Unknown structure
+                                df = pd.DataFrame([data])
+                                
+                        except Exception as e:
+                            # Try line-delimited JSON
+                            try:
+                                records = []
+                                with open(file_path, 'r', encoding='utf-8') as f:
+                                    for line in f:
+                                        try:
+                                            records.append(json.loads(line))
+                                        except json.JSONDecodeError:
+                                            continue
+                                if records:
+                                    df = pd.DataFrame(records)
+                                else:
+                                    raise ValueError("No valid JSON records found")
+                            except Exception:
+                                raise ValueError(f"Unable to parse JSON file: {str(e)}")
+            
             elif ext in ['.txt', '.dat']:
-                # Try to infer delimiter
-                df = pd.read_csv(file_path, sep=None, engine='python')
+                # Try multiple delimiters and infer the best one
+                try:
+                    # First try to let pandas infer the delimiter
+                    df = pd.read_csv(file_path, sep=None, engine='python')
+                except Exception as txt_err:
+                    logger.warning(f"Text file inference error: {str(txt_err)}")
+                    # Try common delimiters if inference fails
+                    for sep in [',', '\t', '|', ';', ' ']:
+                        try:
+                            df = pd.read_csv(file_path, sep=sep, on_bad_lines='skip')
+                            # Check if we got more than one column, if not continue trying
+                            if df.shape[1] > 1:
+                                break
+                        except:
+                            continue
+                    else:
+                        # If all separators fail, try fixed width
+                        df = pd.read_fwf(file_path)
             else:
                 logger.warning(f"Unsupported file type: {ext}")
                 return None
+            
+            # Post-processing to clean up dataframe
+            # Replace empty strings with NaN
+            df.replace('', pd.NA, inplace=True)
+            
+            # Convert object columns that should be numeric
+            for col in df.select_dtypes(include=['object']).columns:
+                try:
+                    # Check if column can be converted to numeric
+                    numeric_values = pd.to_numeric(df[col], errors='coerce')
+                    # If more than 80% of values are valid numbers, convert the column
+                    if numeric_values.notna().mean() > 0.8:
+                        df[col] = numeric_values
+                except:
+                    pass
+            
+            # Check for date columns and convert them
+            for col in df.select_dtypes(include=['object']).columns:
+                try:
+                    # Try to convert to datetime
+                    dt_col = pd.to_datetime(df[col], errors='coerce')
+                    # If more than 80% are valid dates, convert the column
+                    if dt_col.notna().mean() > 0.8:
+                        df[col] = dt_col
+                except:
+                    pass
             
             logger.info(f"Successfully loaded dataframe with shape: {df.shape}")
             return df
