@@ -11,7 +11,8 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask import (
     Blueprint, render_template, request, jsonify, current_app,
-    session, send_from_directory, abort, redirect, url_for, flash
+    session, send_from_directory, abort, redirect, url_for, flash,
+    make_response
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from urllib.parse import urlparse
@@ -1302,6 +1303,146 @@ def get_report(report_id):
         logger.error(f"Error getting report: {str(e)}")
         logger.error(traceback.format_exc())
         return jsonify({"success": False, "error": str(e)}), 500
+        
+@main.route('/api/reports/<int:report_id>/download', methods=['GET'])
+@login_required
+def download_report(report_id):
+    """
+    Download a report as PDF or markdown.
+    """
+    try:
+        # Get format from query params (default to markdown)
+        report_format = request.args.get('format', 'markdown')
+        
+        # Get the report data
+        report = Report.query.filter_by(id=report_id, user_id=current_user.id).first()
+        
+        if not report:
+            return jsonify({"success": False, "error": "Report not found"}), 404
+            
+        chart_ids = json.loads(report.chart_ids)
+        charts = []
+        
+        for chart_id in chart_ids:
+            chart = SavedChart.query.filter_by(id=chart_id).first()
+            if chart:
+                charts.append({
+                    "id": chart.id,
+                    "chart_type": chart.chart_type,
+                    "chart_title": chart.chart_title,
+                    "chart_data": chart.chart_data,
+                    "chart_config": chart.chart_config,
+                    "created_at": chart.created_at.isoformat()
+                })
+        
+        if not charts:
+            return jsonify({"success": False, "error": "No charts found in report"}), 400
+            
+        # Get latest file data if available
+        from datetime import timedelta
+        cutoff_time = datetime.now() - timedelta(hours=24)
+        latest_upload = Upload.query.filter(Upload.user_id == current_user.id, 
+                                           Upload.upload_date >= cutoff_time,
+                                           Upload.active == True).first()
+                                           
+        data_summary = None
+        if latest_upload:
+            # Try to get data summary from the file
+            try:
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], latest_upload.filename)
+                processor = DataProcessor()
+                data_result = processor.process_file(file_path)
+                if data_result.get("success", False):
+                    data_summary = data_result.get("summary", None)
+            except Exception as e:
+                logger.warning(f"Could not get data summary for report: {str(e)}")
+                
+        # Get AI client to generate the report
+        ai_client = get_ai_instance()
+        
+        if not ai_client:
+            return jsonify({"success": False, "error": "AI service not available"}), 503
+            
+        # Generate the report content
+        if report_format == 'pdf':
+            content = ai_client.generate_pdf_report(charts, data_summary)
+            filename = f"report_{report_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+            mimetype = 'text/markdown'
+        else:
+            content = ai_client.generate_report(charts, data_summary)
+            filename = f"report_{report_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+            mimetype = 'text/markdown'
+            
+        # Create a response with the report content
+        response = make_response(content)
+        response.headers['Content-Disposition'] = f'attachment; filename={filename}'
+        response.headers['Content-Type'] = mimetype
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error downloading report: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@main.route('/help', methods=['GET'])
+def help_page():
+    """
+    Render the help/contact page
+    """
+    try:
+        return render_template('help.html')
+    except Exception as e:
+        logger.error(f"Error rendering help page: {str(e)}")
+        logger.error(traceback.format_exc())
+        return render_template('error.html', error=str(e)), 500
+
+@main.route('/api/help', methods=['GET'])
+def get_help_info():
+    """
+    Get help and contact information
+    """
+    try:
+        help_info = {
+            "contact_email": "smartdatahub3@gmail.com",
+            "support_hours": "Monday - Friday, 9 AM - 5 PM EST",
+            "version": "1.0.0",
+            "documentation_url": "/help"
+        }
+        
+        faq = [
+            {
+                "question": "How do I upload files?",
+                "answer": "Click on the 'Upload Files' button in the dashboard and select the files you want to analyze."
+            },
+            {
+                "question": "What file formats are supported?",
+                "answer": "We support CSV, Excel (XLSX, XLS), JSON, and text files (TXT, DAT)."
+            },
+            {
+                "question": "How do I create a report?",
+                "answer": "Select the charts you want to include, then click on 'Generate Report'."
+            },
+            {
+                "question": "Can I download my reports?",
+                "answer": "Yes, after creating a report, you can download it in Markdown format."
+            },
+            {
+                "question": "How do I get help?",
+                "answer": "You can email us at smartdatahub3@gmail.com or visit the help page."
+            }
+        ]
+        
+        return jsonify({
+            "success": True,
+            "help_info": help_info,
+            "faq": faq
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting help info: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @main.route('/api/welcome-message', methods=['GET'])
 @login_required
@@ -1316,13 +1457,17 @@ def get_welcome_message():
             "Suggest charts that fit my files",
             "Give me a brief analysis",
             "What patterns do you see in my data?",
-            "How can I improve data quality?"
+            "How can I improve data quality?",
+            "Create a report with key insights"
         ]
+        
+        help_text = "For support, email us at smartdatahub3@gmail.com"
         
         return jsonify({
             "success": True,
             "welcome_message": welcome_message,
-            "suggested_prompts": suggested_prompts
+            "suggested_prompts": suggested_prompts,
+            "help_text": help_text
         })
         
     except Exception as e:
