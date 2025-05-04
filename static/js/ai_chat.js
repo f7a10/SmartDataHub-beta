@@ -48,6 +48,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.suggested_prompts && data.suggested_prompts.length > 0) {
                     displaySuggestedPrompts(data.suggested_prompts);
                 }
+                
+                // Add help text if available
+                if (data.help_text) {
+                    // Create a help info element
+                    const helpContainer = document.createElement('div');
+                    helpContainer.className = 'chat-help-info';
+                    helpContainer.innerHTML = `
+                        <div class="help-divider"></div>
+                        <div class="help-text">
+                            <i class="fas fa-info-circle"></i> ${data.help_text}
+                        </div>
+                        <div class="help-link">
+                            <a href="/help">Need more help? Visit our Help Center</a>
+                        </div>
+                    `;
+                    
+                    // Add to the chat container
+                    const chatContainer = document.querySelector('.ai-chat-container');
+                    chatContainer.appendChild(helpContainer);
+                }
             } else {
                 // Fallback welcome message
                 addMessage("👋 Hello! I'm your AI assistant. I can help analyze your data and provide insights. What would you like to know about your files?", false);
@@ -57,6 +77,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     "Suggest charts that fit my files",
                     "Give me a brief analysis"
                 ]);
+                
+                // Add fallback help text
+                const helpContainer = document.createElement('div');
+                helpContainer.className = 'chat-help-info';
+                helpContainer.innerHTML = `
+                    <div class="help-divider"></div>
+                    <div class="help-text">
+                        <i class="fas fa-info-circle"></i> For support, email us at smartdatahub3@gmail.com
+                    </div>
+                    <div class="help-link">
+                        <a href="/help">Need more help? Visit our Help Center</a>
+                    </div>
+                `;
+                
+                // Add to the chat container
+                const chatContainer = document.querySelector('.ai-chat-container');
+                chatContainer.appendChild(helpContainer);
             }
         } catch (error) {
             console.error('Error loading welcome message:', error);
