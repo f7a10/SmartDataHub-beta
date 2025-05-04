@@ -195,6 +195,21 @@
                             <div class="report-step-content active" id="step-1-content">
                                 <h3>Select Data Files for Report</h3>
                                 <p>Choose the files you want to include in your report analysis</p>
+                                
+                                <!-- File Upload Section -->
+                                <div class="report-file-upload">
+                                    <div class="upload-area" id="reportUploadArea">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <h4>Drag & Drop Files Here</h4>
+                                        <p>or</p>
+                                        <label class="upload-btn" for="reportFileInput">
+                                            Browse Files
+                                            <input type="file" id="reportFileInput" multiple accept=".csv,.xlsx,.xls,.json,.txt" style="display: none;">
+                                        </label>
+                                        <p class="file-types">Supported files: CSV, Excel, JSON, TXT</p>
+                                    </div>
+                                </div>
+                                
                                 <div class="report-file-selection" id="reportFileSelection">
                                     <!-- Available files will be populated by JavaScript -->
                                 </div>
