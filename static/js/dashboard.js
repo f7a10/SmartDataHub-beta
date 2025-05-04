@@ -204,13 +204,6 @@ document.addEventListener('DOMContentLoaded', function() {
         controlsContainer.className = 'file-analysis-controls';
         controlsContainer.innerHTML = `
             <div class="control-group">
-                <label class="control-label">
-                    <input type="checkbox" id="combine-files-checkbox">
-                    Combine files for analysis
-                </label>
-                <div class="control-help">When checked, all files will be combined for analysis</div>
-            </div>
-            <div class="control-group">
                 <button id="select-all-files" class="btn-sm">Select All</button>
                 <button id="deselect-all-files" class="btn-sm">Deselect All</button>
             </div>
@@ -220,10 +213,6 @@ document.addEventListener('DOMContentLoaded', function() {
         fileList.parentNode.insertBefore(controlsContainer, fileList.nextSibling);
         
         // Add event listeners
-        const combineCheckbox = document.getElementById('combine-files-checkbox');
-        combineCheckbox.addEventListener('change', function() {
-            sessionData.combineFiles = this.checked;
-        });
         
         // Select all files
         document.getElementById('select-all-files').addEventListener('click', function() {

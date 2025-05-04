@@ -162,7 +162,6 @@ class ChartManager {
                 </div>
                 <div class="chart-info">
                     <div class="chart-name">${option.name}</div>
-                    <div class="chart-desc">${option.suitable ? 'Recommended' : 'Optional'}</div>
                 </div>
             `;
             
