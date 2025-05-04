@@ -4,6 +4,7 @@ import uuid
 import logging
 import time
 import traceback
+import io
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -12,7 +13,7 @@ from werkzeug.utils import secure_filename
 from flask import (
     Blueprint, render_template, request, jsonify, current_app,
     session, send_from_directory, abort, redirect, url_for, flash,
-    make_response
+    make_response, send_file
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from urllib.parse import urlparse
@@ -1533,18 +1534,109 @@ def download_report(report_id):
                 return jsonify({"success": False, "error": "AI service not available"}), 503
                 
             # Generate the report content
-            if report_format == 'pdf':
-                content = ai_client.generate_pdf_report(charts, data_summary)
-            else:
-                content = ai_client.generate_report(charts, data_summary)
+            content = ai_client.generate_report(charts, data_summary)
             
             # Update the report with the generated content
             report.content = content
             db.session.add(report)
             db.session.commit()
+        
+        # Set filename and mimetype based on format
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        if report_format == 'pdf':
+            filename = f"report_{report_id}_{timestamp}.pdf"
+            mimetype = 'application/pdf'
             
-        filename = f"report_{report_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
-        mimetype = 'text/markdown'
+            try:
+                # Convert markdown to HTML
+                import markdown
+                html_content = markdown.markdown(content)
+                
+                # Add proper styling
+                styled_html = f"""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>{report.title}</title>
+                    <style>
+                        body {{
+                            font-family: Arial, sans-serif;
+                            line-height: 1.6;
+                            margin: 20px;
+                            color: #333;
+                        }}
+                        h1 {{
+                            color: #2c3e50;
+                            border-bottom: 1px solid #eee;
+                            padding-bottom: 10px;
+                        }}
+                        h2 {{
+                            color: #3498db;
+                            margin-top: 25px;
+                        }}
+                        h3 {{
+                            color: #2980b9;
+                        }}
+                        table {{
+                            border-collapse: collapse;
+                            width: 100%;
+                            margin: 20px 0;
+                        }}
+                        th, td {{
+                            border: 1px solid #ddd;
+                            padding: 8px;
+                        }}
+                        th {{
+                            background-color: #f2f2f2;
+                            text-align: left;
+                        }}
+                        .report-header {{
+                            margin-bottom: 30px;
+                        }}
+                        .report-header .date {{
+                            color: #7f8c8d;
+                            font-size: 0.9em;
+                        }}
+                        .report-header .description {{
+                            font-style: italic;
+                            color: #666;
+                            margin: 10px 0;
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <div class="report-header">
+                        <h1>{report.title}</h1>
+                        <div class="date">Generated on {datetime.now().strftime('%Y-%m-%d')}</div>
+                        <div class="description">{report.description or ""}</div>
+                    </div>
+                    {html_content}
+                </body>
+                </html>
+                """
+                
+                # Convert HTML to PDF using WeasyPrint
+                from weasyprint import HTML
+                pdf_content = HTML(string=styled_html).write_pdf()
+                
+                # Return PDF content
+                return send_file(
+                    io.BytesIO(pdf_content),
+                    download_name=filename,
+                    mimetype=mimetype,
+                    as_attachment=True
+                )
+                
+            except Exception as e:
+                logger.error(f"PDF conversion error: {str(e)}")
+                # Fall back to markdown if PDF conversion fails
+                filename = f"report_{report_id}_{timestamp}.md"
+                mimetype = 'text/markdown'
+                logger.warning("Falling back to markdown format due to PDF conversion error")
+        else:
+            filename = f"report_{report_id}_{timestamp}.md"
+            mimetype = 'text/markdown'
             
         # Create a response with the report content
         response = make_response(content)

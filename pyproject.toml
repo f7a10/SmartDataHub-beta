@@ -21,4 +21,7 @@ dependencies = [
     "requests>=2.32.3",
     "openpyxl>=3.1.5",
     "openai>=1.76.2",
+    "markdown>=3.8",
+    "pdfkit>=1.0.0",
+    "weasyprint>=65.1",
 ]
