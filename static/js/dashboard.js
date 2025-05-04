@@ -318,7 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
             metricsGrid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Calculating metrics...</div>';
             
             // Clear AI insights
-            aiInsightsContent.textContent = "Generating insights...";
+            aiInsightsContent.innerHTML = "<div class='loading-message'>Generating insights...</div>";
             
             // Clean up previous charts to avoid rendering conflicts
             try {
@@ -377,14 +377,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 showNotification('Error analyzing files: ' + (analysisResult.error || 'Unknown error'), 'error');
                 // Clear any stale UI elements on error
                 metricsGrid.innerHTML = '<div class="error-state">Analysis failed. Please try again.</div>';
-                aiInsightsContent.textContent = "Unable to generate insights. Please try again.";
+                aiInsightsContent.innerHTML = "<div class='error-message'>Unable to generate insights. Please try again.</div>";
             }
         } catch (error) {
             console.error('Error during analysis:', error);
             showNotification('An error occurred during analysis', 'error');
             // Clear any stale UI elements on error
             metricsGrid.innerHTML = '<div class="error-state">Analysis failed. Please try again.</div>';
-            aiInsightsContent.textContent = "Unable to generate insights. Please try again.";
+            aiInsightsContent.innerHTML = "<div class='error-message'>Unable to generate insights. Please try again.</div>";
         } finally {
             // Reset button state
             analyzeBtn.disabled = sessionData.selectedFileIndices.length === 0;
@@ -506,9 +506,46 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Display AI insights
             if (results.ai_insights) {
-                aiInsightsContent.textContent = results.ai_insights;
+                // Use the marked library for proper Markdown rendering if available
+                if (typeof marked !== 'undefined') {
+                    try {
+                        // Configure marked options
+                        marked.setOptions({
+                            breaks: true,              // Add <br> on single line breaks
+                            gfm: true,                 // GitHub Flavored Markdown
+                            headerIds: false,          // Don't add IDs to headers
+                            mangle: false,             // Don't mangle email addresses
+                            smartLists: true,          // Use smarter list behavior
+                            smartypants: true,         // Use "smart" typographic punctuation
+                            xhtml: false               // Don't close tags with a slash
+                        });
+                        
+                        // Parse Markdown to HTML
+                        aiInsightsContent.innerHTML = marked.parse(results.ai_insights);
+                    } catch (e) {
+                        console.error('Error parsing Markdown for AI insights:', e);
+                        // Fall back to basic formatting if marked fails
+                        aiInsightsContent.innerHTML = formatBasicMarkdown(results.ai_insights);
+                    }
+                } else {
+                    // Fall back to basic formatting if marked isn't available
+                    aiInsightsContent.innerHTML = formatBasicMarkdown(results.ai_insights);
+                }
             } else {
                 aiInsightsContent.textContent = "No AI insights available for this data.";
+            }
+            
+            // Helper function for basic Markdown formatting
+            function formatBasicMarkdown(content) {
+                return content
+                    .replace(/# (.*)/g, '<h1>$1</h1>')
+                    .replace(/## (.*)/g, '<h2>$1</h2>')
+                    .replace(/### (.*)/g, '<h3>$1</h3>')
+                    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                    .replace(/- (.*)/g, '<ul><li>$1</li></ul>')
+                    .replace(/<\/ul><ul>/g, '')  // Combine consecutive list items
+                    .replace(/\n/g, '<br>');
             }
             
             // Safely scroll to dashboard section
