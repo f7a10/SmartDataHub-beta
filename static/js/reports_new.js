@@ -656,13 +656,44 @@ document.addEventListener('DOMContentLoaded', function() {
         const messageEl = document.createElement('div');
         messageEl.className = 'report-ai-message ai-message';
         
-        // Support basic markdown formatting
-        const formattedMessage = message
-            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-            .replace(/\n/g, '<br>');
-            
-        messageEl.innerHTML = formattedMessage;
+        // Use the marked library for proper Markdown rendering if available
+        if (typeof marked !== 'undefined') {
+            try {
+                // Configure marked options
+                marked.setOptions({
+                    breaks: true,              // Add <br> on single line breaks
+                    gfm: true,                 // GitHub Flavored Markdown
+                    headerIds: false,          // Don't add IDs to headers
+                    mangle: false,             // Don't mangle email addresses
+                    smartLists: true,          // Use smarter list behavior
+                    smartypants: true,         // Use "smart" typographic punctuation
+                    xhtml: false               // Don't close tags with a slash
+                });
+                
+                // Parse Markdown to HTML
+                messageEl.innerHTML = marked.parse(message);
+            } catch (e) {
+                console.error('Error parsing Markdown for AI message:', e);
+                // Fall back to basic formatting if marked fails
+                messageEl.innerHTML = formatBasicMarkdown(message);
+            }
+        } else {
+            // Fall back to basic formatting if marked isn't available
+            messageEl.innerHTML = formatBasicMarkdown(message);
+        }
+        
+        // Helper function for basic Markdown formatting
+        function formatBasicMarkdown(content) {
+            return content
+                .replace(/# (.*)/g, '<h3>$1</h3>')
+                .replace(/## (.*)/g, '<h4>$1</h4>')
+                .replace(/### (.*)/g, '<h5>$1</h5>')
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                .replace(/- (.*)/g, '<ul><li>$1</li></ul>')
+                .replace(/<\/ul><ul>/g, '')  // Combine consecutive list items
+                .replace(/\n/g, '<br>');
+        }
         reportAiChat.appendChild(messageEl);
         
         // Store in state

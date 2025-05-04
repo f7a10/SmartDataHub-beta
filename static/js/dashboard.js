@@ -532,7 +532,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     aiInsightsContent.innerHTML = formatBasicMarkdown(results.ai_insights);
                 }
             } else {
-                aiInsightsContent.textContent = "No AI insights available for this data.";
+                aiInsightsContent.innerHTML = "<div class='empty-message'>No AI insights available for this data.</div>";
             }
             
             // Helper function for basic Markdown formatting
