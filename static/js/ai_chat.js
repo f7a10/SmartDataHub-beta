@@ -213,6 +213,30 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Format message content with basic markdown-like syntax
     function formatMessageContent(content) {
+        // Use marked library for proper Markdown parsing
+        if (typeof marked !== 'undefined') {
+            try {
+                // Set marked options
+                marked.setOptions({
+                    breaks: true,              // Render line breaks as <br>
+                    gfm: true,                 // GitHub flavored markdown
+                    headerIds: false,          // Don't add IDs to headers
+                    mangle: false,             // Don't mangle email addresses
+                    smartLists: true,          // Use smarter list behavior
+                    smartypants: true,         // Use "smart" typographic punctuation
+                    xhtml: false               // Don't close tags with a slash
+                });
+                
+                // Parse markdown and return HTML
+                return marked.parse(content);
+            } catch (e) {
+                console.error('Error parsing markdown:', e);
+                // Fall back to basic formatting if marked fails
+            }
+        }
+        
+        // If marked is not available or failed, fall back to basic formatting
+        
         // Replace URLs with links
         content = content.replace(
             /(https?:\/\/[^\s]+)/g, 
@@ -224,6 +248,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Replace *italic* with <em>
         content = content.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        
+        // Replace # headers
+        content = content.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+        content = content.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+        content = content.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+        
+        // Replace - list items
+        content = content.replace(/^- (.*?)$/gm, '• $1');
         
         // Replace newlines with <br>
         content = content.replace(/\n/g, '<br>');
@@ -237,12 +269,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const line = lines[i];
             
             // Bullet points
-            if (line.trim().startsWith('• ')) {
+            if (line.trim().startsWith('• ') || line.trim().startsWith('- ')) {
                 if (!inList) {
                     formattedLines.push('<ul>');
                     inList = true;
                 }
-                formattedLines.push('<li>' + line.trim().substring(2) + '</li>');
+                formattedLines.push('<li>' + line.trim().replace(/^[•-]\s/, '') + '</li>');
             } 
             // Numbered lists
             else if (/^\d+\.\s/.test(line.trim())) {
@@ -255,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // End list if needed
             else {
                 if (inList) {
-                    formattedLines.push(line.trim().startsWith('-') ? '<ul>' : '</ul>');
+                    formattedLines.push('</ul>');
                     inList = false;
                 }
                 formattedLines.push(line);
