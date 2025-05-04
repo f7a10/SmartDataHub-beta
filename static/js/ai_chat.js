@@ -66,6 +66,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Add to the chat container
                     const chatContainer = document.querySelector('.ai-chat-container');
+                    
+                    // Remove existing help containers to prevent duplication
+                    const existingHelpContainers = chatContainer.querySelectorAll('.chat-help-info');
+                    existingHelpContainers.forEach(container => container.remove());
+                    
                     chatContainer.appendChild(helpContainer);
                 }
             } else {
@@ -79,6 +84,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 ]);
                 
                 // Add fallback help text
+                const chatContainer = document.querySelector('.ai-chat-container');
+                
+                // Remove existing help containers to prevent duplication
+                const existingHelpContainers = chatContainer.querySelectorAll('.chat-help-info');
+                existingHelpContainers.forEach(container => container.remove());
+                
+                // Add a single help container
                 const helpContainer = document.createElement('div');
                 helpContainer.className = 'chat-help-info';
                 helpContainer.innerHTML = `
@@ -91,8 +103,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
                 
-                // Add to the chat container
-                const chatContainer = document.querySelector('.ai-chat-container');
                 chatContainer.appendChild(helpContainer);
             }
         } catch (error) {
