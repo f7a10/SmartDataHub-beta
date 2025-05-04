@@ -116,33 +116,144 @@ class DataVisualizer:
             import os
             _, ext = os.path.splitext(file_path)
             ext = ext.lower()
+            
+            logger.info(f"Loading file with extension {ext}: {os.path.basename(file_path)}")
 
             # Load based on extension
             if ext == '.csv':
                 try:
-                    df = pd.read_csv(file_path)
-                except UnicodeDecodeError:
-                    df = pd.read_csv(file_path, encoding='latin1')
+                    # Try with different encodings and error handling
+                    for encoding in ['utf-8', 'latin1', 'cp1252']:
+                        try:
+                            # First try to detect delimiter
+                            with open(file_path, 'rb') as f:
+                                sample = f.read(4096)
+                                
+                            # Check if file might be tab-delimited
+                            if b'\t' in sample:
+                                logger.debug(f"Detected tab delimiter in {os.path.basename(file_path)}")
+                                df = pd.read_csv(file_path, encoding=encoding, sep='\t', on_bad_lines='skip')
+                            else:
+                                df = pd.read_csv(file_path, encoding=encoding, on_bad_lines='skip')
+                            
+                            # Check if we have a reasonable number of columns
+                            if df.shape[1] <= 1 and ',' in str(sample):
+                                logger.debug(f"Single column detected, trying comma delimiter for {os.path.basename(file_path)}")
+                                df = pd.read_csv(file_path, encoding=encoding, sep=',', on_bad_lines='skip')
+                                
+                            # Check if we need to try more delimiters for proper column detection
+                            if df.shape[1] <= 2 and df.shape[0] > 0:
+                                for sep in [';', '|', ' ']:
+                                    try:
+                                        test_df = pd.read_csv(file_path, encoding=encoding, sep=sep, on_bad_lines='skip')
+                                        if test_df.shape[1] > df.shape[1]:
+                                            logger.debug(f"Found better delimiter '{sep}' with {test_df.shape[1]} columns")
+                                            df = test_df
+                                    except:
+                                        continue
+                            
+                            logger.debug(f"Successfully loaded with encoding {encoding}, shape: {df.shape}")
+                            break
+                        except UnicodeDecodeError:
+                            continue
+                        except Exception as e:
+                            logger.warning(f"Error with encoding {encoding}: {str(e)}")
+                    else:
+                        # If all standard approaches fail, try with engine='python' which is more flexible
+                        logger.debug(f"Trying python engine for {os.path.basename(file_path)}")
+                        df = pd.read_csv(file_path, encoding='latin1', engine='python', on_bad_lines='skip')
+                        
+                except Exception as csv_err:
+                    logger.warning(f"CSV read error, trying alternative approach: {str(csv_err)}")
+                    # Last resort: try fixed width format if all else fails
+                    df = pd.read_fwf(file_path, encoding='latin1')
+                    
             elif ext in ['.xlsx', '.xls']:
-                df = pd.read_excel(file_path)
+                try:
+                    # Standard Excel read
+                    df = pd.read_excel(file_path)
+                except Exception as excel_err:
+                    logger.warning(f"Excel read error: {str(excel_err)}")
+                    # Try with explicit sheet name
+                    xl = pd.ExcelFile(file_path)
+                    if len(xl.sheet_names) > 0:
+                        df = pd.read_excel(file_path, sheet_name=xl.sheet_names[0])
+                    else:
+                        raise ValueError("No valid sheets found in Excel file")
+                        
             elif ext == '.json':
                 try:
                     df = pd.read_json(file_path)
                 except ValueError:
                     # Try loading as dictionary if array format fails
-                    with open(file_path, 'r') as f:
+                    with open(file_path, 'r', encoding='utf-8') as f:
                         data = json.load(f)
                     if isinstance(data, dict):
-                        df = pd.DataFrame.from_dict(data, orient='index')
+                        if any(isinstance(v, dict) for v in data.values()):
+                            # Nested dictionary - normalize it
+                            df = pd.json_normalize(data)
+                        else:
+                            df = pd.DataFrame.from_dict(data, orient='index')
                     else:
                         df = pd.DataFrame(data)
-            elif ext == '.txt' or ext == '.dat':
-                # Try to infer delimiter
-                df = pd.read_csv(file_path, sep=None, engine='python')
+                        
+            elif ext in ['.txt', '.dat']:
+                # Try multiple methods to detect the correct delimiter
+                try:
+                    # First try automatic inference
+                    df = pd.read_csv(file_path, sep=None, engine='python')
+                    
+                    # Check if we have a reasonable number of columns (at least 2)
+                    if df.shape[1] <= 1:
+                        logger.debug(f"Only {df.shape[1]} columns detected, trying alternative delimiters")
+                        best_df = df
+                        
+                        # Try common delimiters
+                        for sep in [',', '\t', ';', '|', ' ']:
+                            try:
+                                test_df = pd.read_csv(file_path, sep=sep, on_bad_lines='skip')
+                                if test_df.shape[1] > best_df.shape[1]:
+                                    logger.debug(f"Found better delimiter '{sep}' with {test_df.shape[1]} columns")
+                                    best_df = test_df
+                            except:
+                                continue
+                                
+                        # Use the dataframe with the most columns
+                        if best_df.shape[1] > df.shape[1]:
+                            df = best_df
+                        
+                except Exception as txt_err:
+                    logger.warning(f"Text file read error: {str(txt_err)}")
+                    # Try fixed width format as a last resort
+                    df = pd.read_fwf(file_path)
             else:
                 logger.warning(f"Unsupported file type: {ext}")
                 return None
 
+            # Post-process the dataframe
+            # Handle empty strings and convert to appropriate types
+            df.replace('', pd.NA, inplace=True)
+            
+            # Try to convert string columns to numeric where appropriate
+            for col in df.select_dtypes(include=['object']).columns:
+                try:
+                    numeric_values = pd.to_numeric(df[col], errors='coerce')
+                    # If more than 70% of values are valid numbers, convert the column
+                    if numeric_values.notna().mean() > 0.7:
+                        df[col] = numeric_values
+                except:
+                    pass
+                    
+            # Try to convert date-like columns to datetime
+            for col in df.select_dtypes(include=['object']).columns:
+                try:
+                    date_values = pd.to_datetime(df[col], errors='coerce')
+                    # If more than 70% are valid dates, convert the column
+                    if date_values.notna().mean() > 0.7:
+                        df[col] = date_values
+                except:
+                    pass
+                    
             logger.info(f"Successfully loaded file with shape: {df.shape}")
             return df
 

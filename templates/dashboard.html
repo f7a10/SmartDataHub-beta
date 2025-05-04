@@ -153,30 +153,149 @@
             <div class="content-section reports-section" id="reportsSection" style="display: none;">
                 <div class="section-header">
                     <h2>Reports</h2>
-                    <p>View and download your generated reports</p>
+                    <p>Create comprehensive reports from your data and visualizations</p>
                 </div>
-                <div class="reports-list" id="reportsList">
-                    <!-- Reports will be populated by JavaScript -->
+                
+                <!-- Existing Reports List -->
+                <div class="reports-tabs">
+                    <button class="reports-tab-btn active" data-tab="existing-reports">My Reports</button>
+                    <button class="reports-tab-btn" data-tab="create-report">Create New Report</button>
                 </div>
-                <div class="create-report-container">
-                    <h3>Create New Report</h3>
-                    <form id="createReportForm">
-                        <div class="form-group">
-                            <label for="reportTitle">Report Title</label>
-                            <input type="text" id="reportTitle" required placeholder="Enter report title">
-                        </div>
-                        <div class="form-group">
-                            <label for="reportDescription">Description (optional)</label>
-                            <textarea id="reportDescription" placeholder="Enter report description"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Select Charts to Include</label>
-                            <div class="chart-selection-for-report" id="chartSelectionForReport">
-                                <!-- Chart checkboxes will be populated by JavaScript -->
+                
+                <div class="reports-tab-content active" id="existing-reports-tab">
+                    <div class="reports-list" id="reportsList">
+                        <!-- Reports will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Create New Report Tab -->
+                <div class="reports-tab-content" id="create-report-tab">
+                    <div class="create-report-container">
+                        <div class="report-creation-steps">
+                            <div class="report-step active" id="step-1">
+                                <div class="step-number">1</div>
+                                <div class="step-label">Select Files</div>
+                            </div>
+                            <div class="report-step" id="step-2">
+                                <div class="step-number">2</div>
+                                <div class="step-label">Choose Charts</div>
+                            </div>
+                            <div class="report-step" id="step-3">
+                                <div class="step-number">3</div>
+                                <div class="step-label">Define Report</div>
+                            </div>
+                            <div class="report-step" id="step-4">
+                                <div class="step-number">4</div>
+                                <div class="step-label">AI Assistance</div>
                             </div>
                         </div>
-                        <button type="submit" class="btn-generate-report">Generate Report</button>
-                    </form>
+                        
+                        <div class="report-creation-content">
+                            <!-- Step 1: Select Files -->
+                            <div class="report-step-content active" id="step-1-content">
+                                <h3>Select Data Files for Report</h3>
+                                <p>Choose the files you want to include in your report analysis</p>
+                                <div class="report-file-selection" id="reportFileSelection">
+                                    <!-- Available files will be populated by JavaScript -->
+                                </div>
+                                <div class="report-step-actions">
+                                    <button class="btn-next-step" data-next="step-2">Next: Choose Charts</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 2: Choose Charts -->
+                            <div class="report-step-content" id="step-2-content">
+                                <h3>Select Visualizations</h3>
+                                <p>Choose the charts you want to include in your report</p>
+                                <div class="report-charts-selection" id="reportChartSelection">
+                                    <div class="report-charts-grid" id="availableChartsGrid">
+                                        <!-- Available charts will be populated here -->
+                                    </div>
+                                    <div class="report-charts-preview" id="selectedChartsPreview">
+                                        <h4>Selected Charts</h4>
+                                        <div class="selected-charts-grid" id="selectedChartsGrid">
+                                            <!-- Selected charts will be shown here -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="report-step-actions">
+                                    <button class="btn-prev-step" data-prev="step-1">Back</button>
+                                    <button class="btn-next-step" data-next="step-3">Next: Define Report</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 3: Define Report -->
+                            <div class="report-step-content" id="step-3-content">
+                                <h3>Define Your Report</h3>
+                                <p>Enter the details for your report</p>
+                                <form id="reportDetailsForm">
+                                    <div class="form-group">
+                                        <label for="reportTitle">Report Title</label>
+                                        <input type="text" id="reportTitle" required placeholder="Enter a descriptive title for your report">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reportDescription">Description</label>
+                                        <textarea id="reportDescription" placeholder="Describe what this report is about and its purpose"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reportAudience">Target Audience</label>
+                                        <select id="reportAudience">
+                                            <option value="executive">Executive/Management</option>
+                                            <option value="technical">Technical/Analyst</option>
+                                            <option value="general">General Audience</option>
+                                            <option value="marketing">Marketing Team</option>
+                                            <option value="custom">Custom</option>
+                                        </select>
+                                    </div>
+                                </form>
+                                <div class="report-step-actions">
+                                    <button class="btn-prev-step" data-prev="step-2">Back</button>
+                                    <button class="btn-next-step" data-next="step-4">Next: AI Assistance</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 4: AI Assistance -->
+                            <div class="report-step-content" id="step-4-content">
+                                <h3>AI-Assisted Report Creation</h3>
+                                <p>Tell our AI assistant what you'd like to include in your report</p>
+                                
+                                <div class="report-ai-interaction">
+                                    <div class="report-ai-chat" id="reportAiChat">
+                                        <!-- AI chat messages will appear here -->
+                                    </div>
+                                    <div class="report-ai-input-container">
+                                        <textarea id="reportAiInput" placeholder="Describe what you want in your report... (e.g., 'Include a summary of key trends in the data', 'Focus on correlations between variables', etc.)"></textarea>
+                                        <button id="sendReportAiRequest" class="btn-send-ai-request">
+                                            <i class="fas fa-paper-plane"></i> Generate with AI
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="report-ai-suggestions">
+                                    <h4>Suggested Prompts</h4>
+                                    <div class="report-ai-suggestion-pills">
+                                        <span class="ai-suggestion-pill" data-prompt="Create an executive summary of the key insights from my data">Executive Summary</span>
+                                        <span class="ai-suggestion-pill" data-prompt="Identify the top trends in my data and explain their significance">Trend Analysis</span>
+                                        <span class="ai-suggestion-pill" data-prompt="Find correlations between variables and explain what they mean">Correlation Analysis</span>
+                                        <span class="ai-suggestion-pill" data-prompt="Provide recommendations based on the data findings">Recommendations</span>
+                                        <span class="ai-suggestion-pill" data-prompt="Create a detailed analysis focusing on outliers and anomalies">Anomaly Detection</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="report-preview" id="reportPreviewSection">
+                                    <h4>Report Preview</h4>
+                                    <div class="report-preview-content" id="reportPreviewContent">
+                                        <!-- Generated report preview will appear here -->
+                                    </div>
+                                </div>
+                                
+                                <div class="report-step-actions">
+                                    <button class="btn-prev-step" data-prev="step-3">Back</button>
+                                    <button class="btn-save-report" id="saveGeneratedReport">Save Report</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -253,6 +372,6 @@
     <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
     <script src="{{ url_for('static', filename='js/ai_chat.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/reports.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/reports_new.js') }}"></script>
 </body>
 </html>

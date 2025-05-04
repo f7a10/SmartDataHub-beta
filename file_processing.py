@@ -67,6 +67,8 @@ class DataProcessor:
             pandas DataFrame or None if loading fails
         """
         try:
+            logger.info(f"Loading file: {os.path.basename(file_path)}")
+            
             # Get file extension
             _, ext = os.path.splitext(file_path)
             ext = ext.lower()
@@ -74,36 +76,96 @@ class DataProcessor:
             # Load based on file type
             if ext == '.csv':
                 try:
-                    # Try with different encodings and error handling
+                    # First check file content to determine the best approach
+                    with open(file_path, 'rb') as f:
+                        sample = f.read(4096)
+                        sample_str = str(sample)
+                    
+                    # Detect potential delimiters
+                    potential_delimiters = []
+                    for delim in [',', '\t', ';', '|']:
+                        if delim in sample_str:
+                            potential_delimiters.append(delim)
+                    
+                    logger.debug(f"Potential delimiters detected: {potential_delimiters}")
+                    
+                    # Try with different encodings and potential delimiters
+                    best_df = None
+                    max_columns = 0
+                    
                     for encoding in ['utf-8', 'latin1', 'cp1252']:
-                        try:
-                            df = pd.read_csv(file_path, encoding=encoding, on_bad_lines='skip')
+                        # If we found a good dataframe, no need to try more encodings
+                        if best_df is not None and best_df.shape[1] >= 6:
                             break
-                        except UnicodeDecodeError:
-                            continue
+                            
+                        # Try auto-detection first
+                        try:
+                            df = pd.read_csv(file_path, encoding=encoding, on_bad_lines='skip', engine='python')
+                            if df.shape[1] > max_columns:
+                                best_df = df
+                                max_columns = df.shape[1]
+                                logger.debug(f"Auto-detected delimiter with encoding {encoding} found {df.shape[1]} columns")
                         except Exception as e:
-                            logger.warning(f"Error with encoding {encoding}: {str(e)}")
+                            logger.debug(f"Auto-detection failed with encoding {encoding}: {str(e)}")
+                        
+                        # Try each potential delimiter
+                        for sep in potential_delimiters:
+                            try:
+                                df = pd.read_csv(file_path, encoding=encoding, sep=sep, on_bad_lines='skip')
+                                if df.shape[1] > max_columns:
+                                    best_df = df
+                                    max_columns = df.shape[1]
+                                    logger.debug(f"Delimiter '{sep}' with encoding {encoding} found {df.shape[1]} columns")
+                            except Exception as e:
+                                logger.debug(f"Error with delimiter '{sep}' and encoding {encoding}: {str(e)}")
+                    
+                    # If we found a dataframe with columns, use it
+                    if best_df is not None:
+                        df = best_df
+                        logger.info(f"Selected dataframe with {df.shape[1]} columns")
                     else:
-                        # If all encodings fail, try with a more permissive approach
-                        df = pd.read_csv(file_path, encoding='latin1', on_bad_lines='skip', 
-                                         error_bad_lines=False, warn_bad_lines=True)
+                        # If all approaches failed, try one more flexible approach
+                        logger.warning("All standard approaches failed, trying flexible CSV reading")
+                        df = pd.read_csv(file_path, encoding='latin1', engine='python', 
+                                        on_bad_lines='skip', sep=None)
+                        
                 except Exception as csv_err:
-                    logger.warning(f"CSV read error: {str(csv_err)}")
-                    # Last resort: try to read with engine='python' which can sometimes handle problematic files
-                    df = pd.read_csv(file_path, encoding='latin1', engine='python', on_bad_lines='skip')
+                    logger.warning(f"CSV read error, trying alternative approach: {str(csv_err)}")
+                    # Last resort: try with fixed width format
+                    df = pd.read_fwf(file_path, encoding='latin1')
             
             elif ext in ['.xlsx', '.xls']:
                 try:
-                    # Try standard Excel read
+                    # First try standard Excel read
                     df = pd.read_excel(file_path)
                 except Exception as excel_err:
                     logger.warning(f"Excel read error: {str(excel_err)}")
-                    # Try with sheet_name parameter to get first sheet
-                    xl = pd.ExcelFile(file_path)
-                    if len(xl.sheet_names) > 0:
-                        df = pd.read_excel(file_path, sheet_name=xl.sheet_names[0])
-                    else:
-                        raise ValueError("No valid sheets found in Excel file")
+                    # Try reading all sheets and select the one with most columns
+                    try:
+                        xl = pd.ExcelFile(file_path)
+                        if len(xl.sheet_names) > 0:
+                            best_sheet = None
+                            max_columns = 0
+                            
+                            for sheet in xl.sheet_names:
+                                try:
+                                    sheet_df = pd.read_excel(file_path, sheet_name=sheet)
+                                    if sheet_df.shape[1] > max_columns:
+                                        best_sheet = sheet
+                                        max_columns = sheet_df.shape[1]
+                                except:
+                                    continue
+                            
+                            if best_sheet:
+                                df = pd.read_excel(file_path, sheet_name=best_sheet)
+                                logger.info(f"Selected sheet '{best_sheet}' with {df.shape[1]} columns")
+                            else:
+                                df = pd.read_excel(file_path, sheet_name=xl.sheet_names[0])
+                        else:
+                            raise ValueError("No valid sheets found in Excel file")
+                    except Exception as e:
+                        logger.error(f"Failed to read Excel file: {str(e)}")
+                        raise e
             
             elif ext == '.json':
                 try:
@@ -153,24 +215,47 @@ class DataProcessor:
                                 raise ValueError(f"Unable to parse JSON file: {str(e)}")
             
             elif ext in ['.txt', '.dat']:
-                # Try multiple delimiters and infer the best one
+                # Try multiple approaches to find the best delimiter
+                best_df = None
+                max_columns = 0
+                
+                # Try inferring delimiter with python engine
                 try:
-                    # First try to let pandas infer the delimiter
                     df = pd.read_csv(file_path, sep=None, engine='python')
-                except Exception as txt_err:
-                    logger.warning(f"Text file inference error: {str(txt_err)}")
-                    # Try common delimiters if inference fails
-                    for sep in [',', '\t', '|', ';', ' ']:
-                        try:
-                            df = pd.read_csv(file_path, sep=sep, on_bad_lines='skip')
-                            # Check if we got more than one column, if not continue trying
-                            if df.shape[1] > 1:
-                                break
-                        except:
-                            continue
-                    else:
-                        # If all separators fail, try fixed width
+                    if df.shape[1] > max_columns:
+                        best_df = df
+                        max_columns = df.shape[1]
+                except Exception as e:
+                    logger.debug(f"Error inferring delimiter: {str(e)}")
+                
+                # Try common delimiters explicitly
+                for sep in [',', '\t', '|', ';', ' ']:
+                    try:
+                        df = pd.read_csv(file_path, sep=sep, on_bad_lines='skip')
+                        if df.shape[1] > max_columns:
+                            best_df = df
+                            max_columns = df.shape[1]
+                            logger.debug(f"Delimiter '{sep}' found {df.shape[1]} columns")
+                    except Exception as e:
+                        logger.debug(f"Error with delimiter '{sep}': {str(e)}")
+                
+                # Try fixed width if other methods don't find many columns
+                if max_columns < 3:
+                    try:
                         df = pd.read_fwf(file_path)
+                        if df.shape[1] > max_columns:
+                            best_df = df
+                            max_columns = df.shape[1]
+                            logger.debug(f"Fixed width format found {df.shape[1]} columns")
+                    except Exception as e:
+                        logger.debug(f"Error with fixed width format: {str(e)}")
+                
+                # Use the best dataframe we found
+                if best_df is not None:
+                    df = best_df
+                    logger.info(f"Selected text file parsing method with {df.shape[1]} columns")
+                else:
+                    raise ValueError("Unable to parse text file with any method")
             else:
                 logger.warning(f"Unsupported file type: {ext}")
                 return None
@@ -179,13 +264,20 @@ class DataProcessor:
             # Replace empty strings with NaN
             df.replace('', pd.NA, inplace=True)
             
+            # Check for columns that are all NaN and drop them
+            if df.shape[1] > 0:
+                columns_to_drop = [col for col in df.columns if df[col].isna().all()]
+                if columns_to_drop:
+                    logger.info(f"Dropping {len(columns_to_drop)} columns that contain only NaN values")
+                    df = df.drop(columns=columns_to_drop)
+            
             # Convert object columns that should be numeric
             for col in df.select_dtypes(include=['object']).columns:
                 try:
                     # Check if column can be converted to numeric
                     numeric_values = pd.to_numeric(df[col], errors='coerce')
-                    # If more than 80% of values are valid numbers, convert the column
-                    if numeric_values.notna().mean() > 0.8:
+                    # If more than 70% of values are valid numbers, convert the column
+                    if numeric_values.notna().mean() > 0.7:
                         df[col] = numeric_values
                 except:
                     pass
@@ -195,13 +287,25 @@ class DataProcessor:
                 try:
                     # Try to convert to datetime
                     dt_col = pd.to_datetime(df[col], errors='coerce')
-                    # If more than 80% are valid dates, convert the column
-                    if dt_col.notna().mean() > 0.8:
+                    # If more than 70% are valid dates, convert the column
+                    if dt_col.notna().mean() > 0.7:
                         df[col] = dt_col
                 except:
                     pass
             
             logger.info(f"Successfully loaded dataframe with shape: {df.shape}")
+            
+            # Check the shape, if we have columns but only 1 row, transpose might work better
+            if df.shape[1] >= 1 and df.shape[0] == 1:
+                try:
+                    transposed = df.T
+                    logger.info(f"Transposing dataframe to shape: {transposed.shape}")
+                    if transposed.shape[1] >= 1:
+                        # Only use transpose if it gives us at least one column
+                        df = transposed
+                except Exception as e:
+                    logger.warning(f"Error attempting to transpose: {str(e)}")
+            
             return df
             
         except Exception as e:
