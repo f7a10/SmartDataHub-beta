@@ -15,8 +15,14 @@ window.showSection = function(sectionName) {
         if (section) section.style.display = 'none';
     });
     
-    // Get the AI chat section
+    // Get the AI chat section and dashboard section (analysis results area)
     const aiChatSection = document.getElementById('aiChatSection');
+    const dashboardSection = document.getElementById('dashboardSection');
+    
+    // Always hide dashboard section when changing pages
+    if (dashboardSection) {
+        dashboardSection.style.display = 'none';
+    }
     
     // Show the selected section
     if (sections[sectionName]) {
@@ -495,8 +501,17 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             console.log('Displaying analysis results:', results);
             
-            // Show dashboard section
-            dashboardSection.style.display = 'block';
+            // Show dashboard section only if we're on the dashboard page
+            const currentActivePage = document.querySelector('.sidebar-nav li.active');
+            const isDashboardActive = currentActivePage && currentActivePage === document.querySelector('.sidebar-nav li:first-child');
+            
+            if (isDashboardActive) {
+                dashboardSection.style.display = 'block';
+            } else {
+                // If we're not on the dashboard page, switch to it first
+                window.showSection('dashboard');
+                dashboardSection.style.display = 'block';
+            }
             
             // Display metrics - with extra logging
             if (results.metrics) {
