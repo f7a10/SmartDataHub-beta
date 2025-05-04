@@ -343,17 +343,51 @@ document.addEventListener('DOMContentLoaded', function() {
     // Download report
     async function downloadReport(reportId) {
         try {
-            const response = await fetch(`/api/reports/${reportId}`);
-            const data = await response.json();
+            // Show loading indicator
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.className = 'loading-overlay';
+            loadingIndicator.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Generating report...</div>';
+            document.body.appendChild(loadingIndicator);
             
-            if (data.success && data.report) {
-                generatePDFFromReport(data.report);
-            } else {
-                alert('Error loading report: ' + (data.error || 'Unknown error'));
+            // Use the new download API endpoint that generates Markdown/PDF content
+            const format = 'markdown'; // Default to markdown
+            
+            try {
+                // Create a hidden anchor element to trigger the download
+                const downloadLink = document.createElement('a');
+                downloadLink.href = `/api/reports/${reportId}/download?format=${format}`;
+                downloadLink.download = `report_${reportId}.md`;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                // Success message
+                setTimeout(() => {
+                    alert('Report downloaded successfully!');
+                }, 1000);
+            } catch (downloadError) {
+                console.error('Error downloading report file:', downloadError);
+                alert('Error downloading report. Please try again.');
+                
+                // Fallback to old method if the new endpoint fails
+                const response = await fetch(`/api/reports/${reportId}`);
+                const data = await response.json();
+                
+                if (data.success && data.report) {
+                    generatePDFFromReport(data.report);
+                } else {
+                    alert('Error loading report: ' + (data.error || 'Unknown error'));
+                }
             }
         } catch (error) {
             console.error('Error downloading report:', error);
             alert('Network error occurred');
+        } finally {
+            // Remove loading indicator
+            const loadingIndicator = document.querySelector('.loading-overlay');
+            if (loadingIndicator) {
+                document.body.removeChild(loadingIndicator);
+            }
         }
     }
     
