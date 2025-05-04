@@ -365,3 +365,117 @@ class OpenRouterAI:
             logger.error(f"Error creating data story: {str(e)}")
             logger.error(traceback.format_exc())
             return "I'm unable to create a data story at the moment. Please try again later."
+            
+    def generate_report(self, chart_data: List[Dict[str, Any]], data_summary: Dict[str, Any] = None) -> str:
+        """
+        Generate a comprehensive report based on saved charts and data summary.
+        
+        Args:
+            chart_data: A list of dictionaries containing chart information
+            data_summary: Optional dictionary with summary information about the data
+            
+        Returns:
+            str: A formatted report in markdown format
+        """
+        try:
+            if not self.client:
+                return "AI service is not properly initialized. Please check your configuration."
+            
+            logger.info("Generating comprehensive report")
+            
+            chart_info = []
+            for chart in chart_data:
+                chart_info.append({
+                    "title": chart.get("chart_title", "Untitled Chart"),
+                    "type": chart.get("chart_type", "Unknown"),
+                    "data_summary": json.loads(chart.get("chart_data", "{}")) if isinstance(chart.get("chart_data"), str) else chart.get("chart_data", {})
+                })
+            
+            prompt = f"""
+            You are DataHub's expert data analyst creating a professional report document. Based on the charts and data summary provided, 
+            create a comprehensive, well-structured report that explains the insights, patterns, and findings in the data.
+            
+            CHARTS INFORMATION:
+            {json.dumps(chart_info, indent=2)}
+            
+            {"DATA SUMMARY:" + json.dumps(data_summary, indent=2) if data_summary else ""}
+            
+            Create a professional report with the following sections:
+            1. Executive Summary - A brief overview of the key findings (max 150 words)
+            2. Introduction - Context and background about the data
+            3. Key Findings - Detailed analysis of important patterns and insights, organized by theme
+            4. Chart Analysis - Specific observations from each chart, explaining what the visualization reveals
+            5. Recommendations - Actionable insights based on the data
+            6. Conclusion - Summary of the main takeaways
+            
+            Use markdown formatting for better readability:
+            - Use ## for section headers
+            - Use **bold** for emphasis
+            - Use bullet points for lists
+            - Use > for quotes or highlighted insights
+            
+            The report should be comprehensive (1000-1500 words) but focused on the most valuable insights.
+            Analyze relationships between different charts where possible.
+            """
+            
+            response = self.generate_response(prompt)
+            
+            # Add a header with metadata
+            from datetime import datetime
+            header = f"""
+            # Data Analysis Report
+            
+            *Generated on: {datetime.now().strftime('%Y-%m-%d at %H:%M')}*
+            
+            ***
+            
+            """
+            
+            logger.info("Report generated successfully")
+            return header + response
+            
+        except Exception as e:
+            logger.error(f"Error generating report: {str(e)}")
+            logger.error(traceback.format_exc())
+            return f"Error generating report: {str(e)}"
+            
+    def generate_pdf_report(self, chart_data: List[Dict[str, Any]], data_summary: Dict[str, Any] = None) -> str:
+        """
+        Generate a report in markdown format that is optimized for PDF conversion.
+        
+        Args:
+            chart_data: A list of dictionaries containing chart information
+            data_summary: Optional dictionary with summary information about the data
+            
+        Returns:
+            str: A formatted report in markdown format optimized for PDF conversion
+        """
+        try:
+            # Generate the base report content
+            logger.info("Generating PDF-optimized report")
+            md_content = self.generate_report(chart_data, data_summary)
+            
+            # Add PDF-specific formatting
+            from datetime import datetime
+            pdf_header = """
+            ---
+            title: "Data Analysis Report"
+            author: "SmartDataHub AI"
+            date: \"""" + datetime.now().strftime('%Y-%m-%d') + """\"
+            geometry: margin=1in
+            fontsize: 11pt
+            colorlinks: true
+            linkcolor: blue
+            urlcolor: blue
+            toc: true
+            ---
+            
+            """
+            
+            logger.info("PDF-optimized report generated successfully")
+            return pdf_header + md_content
+            
+        except Exception as e:
+            logger.error(f"Error generating PDF report: {str(e)}")
+            logger.error(traceback.format_exc())
+            return f"Error generating PDF report: {str(e)}"
