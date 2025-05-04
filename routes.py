@@ -77,6 +77,20 @@ def index():
     logger.info("Rendering landing page")
     return render_template('index.html')
 
+@main.route('/static/js/dashboard.js')
+def serve_dashboard_js():
+    """Serve the latest version of dashboard.js with no caching."""
+    logger.info("Serving dashboard.js with no caching")
+    # Get the application's root folder
+    root_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # Create response with the file
+    response = make_response(send_from_directory(os.path.join(root_folder, 'static/js'), 'dashboard.js'))
+    # Set headers to prevent caching
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
 @main.route('/login', methods=['GET', 'POST'])
 def login():
     """Handle user login."""

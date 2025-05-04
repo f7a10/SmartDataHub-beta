@@ -373,10 +373,10 @@
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/ai_chat.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/reports_new.js') }}"></script>
+    <!-- Scripts with cache busting parameters -->
+    <script src="{{ url_for('static', filename='js/charts.js') }}?v={{ range(1000, 9999) | random }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}?v={{ range(1000, 9999) | random }}"></script>
+    <script src="{{ url_for('static', filename='js/ai_chat.js') }}?v={{ range(1000, 9999) | random }}"></script>
+    <script src="{{ url_for('static', filename='js/reports_new.js') }}?v={{ range(1000, 9999) | random }}"></script>
 </body>
 </html>
