@@ -261,6 +261,54 @@ def api_register():
         }), 500
 
 @main.route('/upload', methods=['POST'])
+@login_required
+def handle_upload():
+    """Redirect to the upload_files function"""
+    return upload_files()
+
+@main.route('/api/files/session', methods=['GET'])
+@login_required
+def get_session_files():
+    """
+    Get files for the current session.
+    """
+    logger.info("Handling session files request")
+    
+    try:
+        if 'session_id' not in session:
+            logger.warning("No session ID found")
+            return jsonify({"success": False, "error": "No active session"}), 400
+            
+        session_id = session['session_id']
+        
+        # Get files from database for current session
+        active_uploads = Upload.query.filter_by(
+            session_id=session_id,
+            user_id=current_user.id,
+            active=True
+        ).all()
+        
+        files = []
+        for upload in active_uploads:
+            files.append({
+                "id": upload.id,
+                "filename": upload.filename,
+                "original_filename": upload.original_filename,
+                "file_type": upload.file_type,
+                "file_size": upload.file_size,
+                "upload_date": upload.upload_date.isoformat()
+            })
+            
+        return jsonify({
+            "success": True,
+            "files": files
+        })
+        
+    except Exception as e:
+        logger.error(f"Exception in get_session_files: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @main.route('/api/upload', methods=['POST'])
 @login_required
 def upload_files():
