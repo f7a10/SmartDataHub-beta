@@ -1141,35 +1141,51 @@ button {
 }
 
 .chart-selection-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
     margin-bottom: 2rem;
 }
 
+/* Chart Category Styling */
+.chart-category-heading {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chart-category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Chart Option Cards */
 .chart-option {
     background-color: var(--card-bg);
     border-radius: 12px;
-    padding: 1.2rem;
     border: 1px solid var(--border-color);
     transition: var(--transition);
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
+    overflow: hidden;
 }
 
 .light-mode .chart-option {
     background-color: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(168, 85, 247, 0.1);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
 }
 
 .chart-option:hover {
     background-color: var(--card-hover);
     border-color: var(--primary-color);
-    transform: translateY(-5px);
+    transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
@@ -1188,21 +1204,69 @@ button {
     border-color: var(--primary-color);
 }
 
-.chart-option-icon {
-    font-size: 2rem;
+/* Chart Option Header */
+.chart-option-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(168, 85, 247, 0.1);
+}
+
+.chart-option-checkbox {
+    position: relative;
+    width: 22px;
+    height: 22px;
+}
+
+.chart-option-checkbox i {
+    position: absolute;
+    font-size: 22px;
+    left: 0;
+    top: 0;
+}
+
+.chart-option-checkbox .fa-square {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.chart-option-checkbox .fa-check-square {
     color: var(--primary-color);
-    margin-bottom: 1rem;
+    display: none;
+}
+
+.chart-option.selected .chart-option-checkbox .fa-square {
+    display: none;
+}
+
+.chart-option.selected .chart-option-checkbox .fa-check-square {
+    display: block;
+}
+
+.chart-option-icon {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-right: 0.5rem;
 }
 
 .light-mode .chart-option-icon {
     color: #8b5cf6; /* Explicit color for light mode */
 }
 
+/* Chart Option Content */
+.chart-option-content {
+    padding: 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
 .chart-option-name {
     font-weight: 600;
     font-size: 1rem;
     color: var(--text-primary);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
 }
 
 .light-mode .chart-option-name {
@@ -1212,10 +1276,22 @@ button {
 .chart-option-desc {
     font-size: 0.8rem;
     color: var(--text-secondary);
+    line-height: 1.4;
 }
 
 .light-mode .chart-option-desc {
     color: #4b5563; /* Medium gray for light mode */
+}
+
+/* Add badge for suitable/unsuitable */
+.chart-option.suitable .chart-option-desc::before {
+    content: '✓ ';
+    color: #10b981; /* Green */
+}
+
+.chart-option.not-suitable .chart-option-desc::before {
+    content: 'ⓘ ';
+    color: #f59e0b; /* Amber */
 }
 
 /* Charts Grid */

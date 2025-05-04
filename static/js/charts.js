@@ -136,36 +136,95 @@ class ChartManager {
         if (!container) return;
 
         container.innerHTML = '';
-
+        
+        // Group charts by category
+        const categories = {
+            'basic': { title: 'Basic Charts', charts: [] },
+            'advanced': { title: 'Advanced Analytics', charts: [] },
+            'correlation': { title: 'Correlation Charts', charts: [] },
+            'distribution': { title: 'Distribution Charts', charts: [] },
+            'other': { title: 'Other Visualizations', charts: [] }
+        };
+        
+        // Categorize charts
         this.chartOptions.forEach(option => {
-            const suitableClass = option.suitable ? 'suitable' : 'not-suitable';
-            const card = document.createElement('div');
-            card.className = `chart-option ${suitableClass}`;
-            card.dataset.chartType = option.id;
+            let category = 'other';
             
-            let iconClass = 'fa-chart-line';
-            switch (option.icon) {
-                case 'chart-bar': iconClass = 'fa-chart-bar'; break;
-                case 'chart-pie': iconClass = 'fa-chart-pie'; break;
-                case 'chart-column': iconClass = 'fa-chart-column'; break;
-                case 'circle-dot': iconClass = 'fa-circle-dot'; break;
-                case 'th': iconClass = 'fa-th'; break;
-                case 'chart-boxplot': iconClass = 'fa-box'; break;
-                case 'spider': iconClass = 'fa-spider'; break;
-                case 'circle': iconClass = 'fa-circle'; break;
+            // Determine category based on chart type
+            if (['line', 'bar', 'pie'].includes(option.id)) {
+                category = 'basic';
+            } else if (['scatter', 'bubble'].includes(option.id)) {
+                category = 'correlation';
+            } else if (['histogram', 'box'].includes(option.id)) {
+                category = 'distribution';
+            } else if (['heatmap', 'radar'].includes(option.id)) {
+                category = 'advanced';
             }
-
-            card.innerHTML = `
-                <div class="chart-option-icon">
-                    <i class="fas ${iconClass}"></i>
-                </div>
-                <div class="chart-option-name">${option.name}</div>
-                <div class="chart-option-desc">${option.suitable ? 'Suitable for your data' : 'Not ideal for this data'}</div>
-            `;
-
-            card.addEventListener('click', () => this.toggleChartSelection(option.id));
-            container.appendChild(card);
+            
+            categories[category].charts.push(option);
         });
+        
+        // Create chart selection boxes by category
+        for (const categoryId in categories) {
+            const category = categories[categoryId];
+            
+            // Only display categories that have charts
+            if (category.charts.length === 0) continue;
+            
+            // Create category heading
+            const categoryHeading = document.createElement('div');
+            categoryHeading.className = 'chart-category-heading';
+            categoryHeading.textContent = category.title;
+            container.appendChild(categoryHeading);
+            
+            // Create chart selection grid for this category
+            const categoryGrid = document.createElement('div');
+            categoryGrid.className = 'chart-category-grid';
+            
+            // Add charts to this category
+            category.charts.forEach(option => {
+                const suitableClass = option.suitable ? 'suitable' : 'not-suitable';
+                const card = document.createElement('div');
+                card.className = `chart-option ${suitableClass}`;
+                card.dataset.chartType = option.id;
+                
+                let iconClass = 'fa-chart-line';
+                switch (option.icon) {
+                    case 'chart-bar': iconClass = 'fa-chart-bar'; break;
+                    case 'chart-pie': iconClass = 'fa-chart-pie'; break;
+                    case 'chart-column': iconClass = 'fa-chart-column'; break;
+                    case 'circle-dot': iconClass = 'fa-circle-dot'; break;
+                    case 'th': iconClass = 'fa-th'; break;
+                    case 'chart-boxplot': iconClass = 'fa-box'; break;
+                    case 'spider': iconClass = 'fa-spider'; break;
+                    case 'circle': iconClass = 'fa-circle'; break;
+                }
+                
+                // Create checkbox for selection
+                const checkbox = document.createElement('div');
+                checkbox.className = 'chart-option-checkbox';
+                checkbox.innerHTML = '<i class="far fa-square"></i><i class="fas fa-check-square"></i>';
+                
+                // Create the chart option card with more detailed info
+                card.innerHTML = `
+                    <div class="chart-option-header">
+                        ${checkbox.outerHTML}
+                        <div class="chart-option-icon">
+                            <i class="fas ${iconClass}"></i>
+                        </div>
+                    </div>
+                    <div class="chart-option-content">
+                        <div class="chart-option-name">${option.name}</div>
+                        <div class="chart-option-desc">${option.suitable ? 'Suitable for your data' : 'Not ideal for this data'}</div>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => this.toggleChartSelection(option.id));
+                categoryGrid.appendChild(card);
+            });
+            
+            container.appendChild(categoryGrid);
+        }
     }
 
     // Toggle chart selection
