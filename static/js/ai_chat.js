@@ -50,29 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // Add help text if available
-                if (data.help_text) {
-                    // Create a help info element
-                    const helpContainer = document.createElement('div');
-                    helpContainer.className = 'chat-help-info';
-                    helpContainer.innerHTML = `
-                        <div class="help-divider"></div>
-                        <div class="help-text">
-                            <i class="fas fa-info-circle"></i> ${data.help_text}
-                        </div>
-                        <div class="help-link">
-                            <a href="/help">Need more help? Visit our Help Center</a>
-                        </div>
-                    `;
-                    
-                    // Add to the chat container
-                    const chatContainer = document.querySelector('.ai-chat-container');
-                    
-                    // Remove existing help containers to prevent duplication
-                    const existingHelpContainers = chatContainer.querySelectorAll('.chat-help-info');
-                    existingHelpContainers.forEach(container => container.remove());
-                    
-                    chatContainer.appendChild(helpContainer);
-                }
+                // Help text removed as requested
             } else {
                 // Fallback welcome message
                 addMessage("👋 Hello! I'm your AI assistant. I can help analyze your data and provide insights. What would you like to know about your files?", false);
@@ -83,27 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     "Give me a brief analysis"
                 ]);
                 
-                // Add fallback help text
-                const chatContainer = document.querySelector('.ai-chat-container');
-                
-                // Remove existing help containers to prevent duplication
-                const existingHelpContainers = chatContainer.querySelectorAll('.chat-help-info');
-                existingHelpContainers.forEach(container => container.remove());
-                
-                // Add a single help container
-                const helpContainer = document.createElement('div');
-                helpContainer.className = 'chat-help-info';
-                helpContainer.innerHTML = `
-                    <div class="help-divider"></div>
-                    <div class="help-text">
-                        <i class="fas fa-info-circle"></i> For support, email us at smartdatahub3@gmail.com
-                    </div>
-                    <div class="help-link">
-                        <a href="/help">Need more help? Visit our Help Center</a>
-                    </div>
-                `;
-                
-                chatContainer.appendChild(helpContainer);
+                // Fallback help text removed as requested
             }
         } catch (error) {
             console.error('Error loading welcome message:', error);
