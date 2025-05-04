@@ -1490,7 +1490,21 @@ def download_report(report_id):
         
         if not report:
             return jsonify({"success": False, "error": "Report not found"}), 404
+        
+        # Use saved content when available - prevents JSON parsing errors
+        if report.content and not request.args.get('regenerate', False):
+            content = report.content
+            filename = f"report_{report_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+            mimetype = 'text/markdown'
             
+            # Create a plain text response with the report content
+            response = make_response(content)
+            response.headers['Content-Disposition'] = f'attachment; filename={filename}'
+            response.headers['Content-Type'] = mimetype
+            
+            return response
+        
+        # Otherwise, generate fresh content
         chart_ids = json.loads(report.chart_ids)
         charts = []
         
@@ -1501,8 +1515,8 @@ def download_report(report_id):
                     "id": chart.id,
                     "chart_type": chart.chart_type,
                     "chart_title": chart.chart_title,
-                    "chart_data": chart.chart_data,
-                    "chart_config": chart.chart_config,
+                    "chart_data": json.loads(chart.chart_data),  # Parse chart data JSON here
+                    "chart_config": json.loads(chart.chart_config) if chart.chart_config else None,
                     "created_at": chart.created_at.isoformat()
                 })
         
@@ -1543,12 +1557,13 @@ def download_report(report_id):
             content = ai_client.generate_report(charts, data_summary)
             filename = f"report_{report_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
             mimetype = 'text/markdown'
-            
-        # If the report has saved content and we're not specifically requesting a fresh generation
-        if report.content and not request.args.get('regenerate', False):
-            content = report.content
         
-        # Create a response with the report content - ensure it's properly encoded
+        # Save the newly generated content to the report
+        if content:
+            report.content = content
+            db.session.commit()
+        
+        # Create a response with the report content
         response = make_response(content)
         response.headers['Content-Disposition'] = f'attachment; filename={filename}'
         response.headers['Content-Type'] = mimetype
