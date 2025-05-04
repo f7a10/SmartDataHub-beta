@@ -1,5 +1,43 @@
 // Dashboard.js - Handles the dashboard UI and file upload functionality
 
+// Define showSection globally so it can be accessed from different JS files
+window.showSection = function(sectionName) {
+    // Get all main sections
+    const sections = {
+        'dashboard': document.querySelector('.upload-section'),
+        'savedCharts': document.getElementById('savedChartsSection'),
+        'reports': document.getElementById('reportsSection'),
+        'conversations': document.getElementById('conversationsSection')
+    };
+    
+    // Hide all sections first
+    Object.values(sections).forEach(section => {
+        if (section) section.style.display = 'none';
+    });
+    
+    // Show the selected section
+    if (sections[sectionName]) {
+        sections[sectionName].style.display = 'block';
+        
+        // Update active state in sidebar
+        document.querySelectorAll('.sidebar-nav li').forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        // Add active class to current nav item
+        const navItems = {
+            'dashboard': document.querySelector('.sidebar-nav li:first-child'),
+            'savedCharts': document.querySelector('.sidebar-nav li:nth-child(2)'),
+            'reports': document.querySelector('.sidebar-nav li:nth-child(3)'),
+            'conversations': document.querySelector('.sidebar-nav li:nth-child(4)')
+        };
+        
+        if (navItems[sectionName]) {
+            navItems[sectionName].classList.add('active');
+        }
+    }
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     // DOM elements
     const fileInput = document.getElementById('fileInput');
