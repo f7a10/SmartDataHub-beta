@@ -15,9 +15,19 @@ window.showSection = function(sectionName) {
         if (section) section.style.display = 'none';
     });
     
+    // Get the AI chat section
+    const aiChatSection = document.getElementById('aiChatSection');
+    
     // Show the selected section
     if (sections[sectionName]) {
         sections[sectionName].style.display = 'block';
+        
+        // Only show AI Chat on the dashboard page
+        if (sectionName === 'dashboard') {
+            if (aiChatSection) aiChatSection.style.display = 'block';
+        } else {
+            if (aiChatSection) aiChatSection.style.display = 'none';
+        }
         
         // Update active state in sidebar
         document.querySelectorAll('.sidebar-nav li').forEach(item => {
