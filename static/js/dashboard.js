@@ -92,13 +92,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         reportsLink.addEventListener('click', function(e) {
             e.preventDefault();
-            showSection('reports');
+            window.showSection('reports');
             loadReports();
         });
         
         conversationsLink.addEventListener('click', function(e) {
             e.preventDefault();
-            showSection('conversations');
+            window.showSection('conversations');
             // Call the loadConversations function from AIChat
             if (window.AIChat && window.AIChat.loadConversations) {
                 window.AIChat.loadConversations();
@@ -1020,7 +1020,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // Show upload section, hide dashboard section
-                showSection('dashboard');
+                window.showSection('dashboard');
                 dashboardSection.style.display = 'none';
                 
                 // Clear AI insights
