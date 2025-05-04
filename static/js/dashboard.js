@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add click listener to the Dashboard link in the sidebar
     document.querySelector('.sidebar-nav li:first-child a').addEventListener('click', function(e) {
         e.preventDefault();
-        showSection('dashboard');
+        window.showSection('dashboard');
     });
     
     // Session data
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Navigation links
         savedChartsLink.addEventListener('click', function(e) {
             e.preventDefault();
-            showSection('savedCharts');
+            window.showSection('savedCharts');
             loadSavedCharts();
         });
         
@@ -788,10 +788,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
     
-    // Local reference for internal use
-    function showSection(sectionName) {
-        window.showSection(sectionName);
-    }
+    // Use the global showSection function directly
+    // No local function needed as window.showSection is already defined
     
     // Open export report modal
     function openExportReportModal() {
