@@ -1311,12 +1311,16 @@ def generate_report():
             if not chart or chart.user_id != current_user.id:
                 return jsonify({"success": False, "error": f"Chart {chart_id} not found or not owned by user"}), 404
                 
+        # Get the content from the request if available
+        content = data.get('content', '')
+        
         # Create new report
         report = Report(
             user_id=current_user.id,
             title=title,
             description=description,
-            chart_ids=json.dumps(chart_ids)
+            chart_ids=json.dumps(chart_ids),
+            content=content
         )
         
         db.session.add(report)
@@ -1453,6 +1457,7 @@ def get_report(report_id):
                 "id": report.id,
                 "title": report.title,
                 "description": report.description,
+                "content": report.content,
                 "created_at": report.created_at.isoformat(),
                 "charts": charts
             }
@@ -1516,21 +1521,30 @@ def download_report(report_id):
             except Exception as e:
                 logger.warning(f"Could not get data summary for report: {str(e)}")
                 
-        # Get AI client to generate the report
-        ai_client = get_ai_instance()
-        
-        if not ai_client:
-            return jsonify({"success": False, "error": "AI service not available"}), 503
-            
-        # Generate the report content
-        if report_format == 'pdf':
-            content = ai_client.generate_pdf_report(charts, data_summary)
-            filename = f"report_{report_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
-            mimetype = 'text/markdown'
+        # Check if the report already has content
+        content = None
+        if report.content:
+            content = report.content
         else:
-            content = ai_client.generate_report(charts, data_summary)
-            filename = f"report_{report_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
-            mimetype = 'text/markdown'
+            # Need to generate content
+            ai_client = get_ai_instance()
+            
+            if not ai_client:
+                return jsonify({"success": False, "error": "AI service not available"}), 503
+                
+            # Generate the report content
+            if report_format == 'pdf':
+                content = ai_client.generate_pdf_report(charts, data_summary)
+            else:
+                content = ai_client.generate_report(charts, data_summary)
+            
+            # Update the report with the generated content
+            report.content = content
+            db.session.add(report)
+            db.session.commit()
+            
+        filename = f"report_{report_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+        mimetype = 'text/markdown'
             
         # Create a response with the report content
         response = make_response(content)
