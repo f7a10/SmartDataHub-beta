@@ -1301,6 +1301,7 @@ def generate_report():
         chart_ids = data.get('chart_ids', [])
         title = data.get('title', f"Report {datetime.now().strftime('%Y-%m-%d %H:%M')}")
         description = data.get('description', '')
+        content = data.get('report_content', '')  # Get the report content if provided
         
         if not chart_ids:
             return jsonify({"success": False, "error": "No charts selected"}), 400
@@ -1310,13 +1311,23 @@ def generate_report():
             chart = SavedChart.query.filter_by(id=chart_id).first()
             if not chart or chart.user_id != current_user.id:
                 return jsonify({"success": False, "error": f"Chart {chart_id} not found or not owned by user"}), 404
-                
+        
+        # If no content is provided, generate a simple default content
+        if not content:
+            content = f"# {title}\n\n{description}\n\n"
+            content += "## Selected Charts\n\n"
+            for i, chart_id in enumerate(chart_ids, 1):
+                chart = SavedChart.query.filter_by(id=chart_id).first()
+                if chart:
+                    content += f"- Chart {i}: {chart.chart_title or 'Unnamed Chart'} ({chart.chart_type})\n"
+        
         # Create new report
         report = Report(
             user_id=current_user.id,
             title=title,
             description=description,
-            chart_ids=json.dumps(chart_ids)
+            chart_ids=json.dumps(chart_ids),
+            content=content
         )
         
         db.session.add(report)
@@ -1453,6 +1464,7 @@ def get_report(report_id):
                 "id": report.id,
                 "title": report.title,
                 "description": report.description,
+                "content": report.content,  # Include the report content
                 "created_at": report.created_at.isoformat(),
                 "charts": charts
             }
@@ -1532,7 +1544,11 @@ def download_report(report_id):
             filename = f"report_{report_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
             mimetype = 'text/markdown'
             
-        # Create a response with the report content
+        # If the report has saved content and we're not specifically requesting a fresh generation
+        if report.content and not request.args.get('regenerate', False):
+            content = report.content
+        
+        # Create a response with the report content - ensure it's properly encoded
         response = make_response(content)
         response.headers['Content-Disposition'] = f'attachment; filename={filename}'
         response.headers['Content-Type'] = mimetype

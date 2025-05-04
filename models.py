@@ -97,6 +97,7 @@ class Report(db.Model):
     title = db.Column(db.String(256), nullable=False)
     description = db.Column(db.Text, nullable=True)
     chart_ids = db.Column(db.Text, nullable=False)  # JSON array of chart IDs
+    content = db.Column(db.Text, nullable=True)  # Report content in markdown format
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     
     def __repr__(self):
