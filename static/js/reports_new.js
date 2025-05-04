@@ -21,8 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedCharts: [],
         reportDetails: {
             title: '',
-            description: '',
-            audience: 'general'
+            description: ''
         },
         aiChat: [],
         reportContent: '',
@@ -240,8 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Update report state
                 reportState.reportDetails = {
                     title: title,
-                    description: document.getElementById('reportDescription').value.trim(),
-                    audience: document.getElementById('reportAudience').value
+                    description: document.getElementById('reportDescription').value.trim()
                 };
                 
                 // If moving to AI step, initialize with welcome message
