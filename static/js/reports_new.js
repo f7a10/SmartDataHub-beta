@@ -1019,8 +1019,21 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch(`/api/reports/${reportId}/download?format=pdf`);
             
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to download report');
+                let errorMessage = 'Failed to download report';
+                try {
+                    // Try to parse as JSON, but don't fail if it's not JSON
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const errorData = await response.json();
+                        errorMessage = errorData.error || errorMessage;
+                    } else {
+                        // If it's not JSON, just use the status text
+                        errorMessage = `Error: ${response.status} ${response.statusText}`;
+                    }
+                } catch (parseError) {
+                    console.error('Error parsing error response:', parseError);
+                }
+                throw new Error(errorMessage);
             }
             
             const blob = await response.blob();
@@ -1028,7 +1041,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const a = document.createElement('a');
             a.href = url;
-            a.download = `report-${reportId}.pdf`;
+            a.download = `report-${reportId}.md`; // Changed to .md since we're returning markdown
             document.body.appendChild(a);
             a.click();
             
