@@ -261,6 +261,7 @@ def api_register():
         }), 500
 
 @main.route('/upload', methods=['POST'])
+@main.route('/api/upload', methods=['POST'])
 @login_required
 def upload_files():
     """
