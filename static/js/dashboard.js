@@ -601,7 +601,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Add any additional metrics provided by the server
         for (const [key, value] of Object.entries(metrics)) {
-            if (!metricDisplays.some(m => m.key === key) && key !== 'session_id') {
+            // Skip session_id and combined_analysis metrics
+            if (!metricDisplays.some(m => m.key === key) && 
+                key !== 'session_id' && 
+                key !== 'combined_analysis') {
+                
                 console.log(`Adding additional metric ${key}: ${value}`);
                 const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                 const card = document.createElement('div');
