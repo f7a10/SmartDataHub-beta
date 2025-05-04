@@ -440,45 +440,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Add auto-select option at the top
-        const autoSelectContainer = document.createElement('div');
-        autoSelectContainer.className = 'auto-select-container';
-        autoSelectContainer.innerHTML = `
-            <div class="auto-select-option">
-                <button id="auto-select-charts" class="btn btn-primary">
-                    <i class="fas fa-magic"></i> Auto-Select All Charts
-                </button>
-                <p class="auto-select-help">Select all available charts automatically</p>
-            </div>
-        `;
-        
-        // Add event listener for auto-select button
-        autoSelectContainer.querySelector('#auto-select-charts').addEventListener('click', () => {
-            // Clear any previous selections
-            reportState.selectedCharts = [];
-            const chartCards = availableChartsGrid.querySelectorAll('.report-chart-card');
-            
-            // Auto-select all charts
-            charts.forEach(chart => {
-                reportState.selectedCharts.push(chart.id);
-            });
-            
-            // Update UI to show all charts as selected
-            chartCards.forEach(card => {
-                card.classList.add('selected');
-            });
-            
-            // Update the selected charts list display
-            updateSelectedChartsList(charts);
-        });
-        
-        availableChartsGrid.appendChild(autoSelectContainer);
-        
-        // Create a chart grid container for the actual charts
-        const chartGridContainer = document.createElement('div');
-        chartGridContainer.className = 'chart-grid-container';
-        availableChartsGrid.appendChild(chartGridContainer);
-        
         charts.forEach(chart => {
             const chartCard = document.createElement('div');
             chartCard.className = 'report-chart-card';
@@ -509,7 +470,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            chartGridContainer.appendChild(chartCard);
+            availableChartsGrid.appendChild(chartCard);
         });
     }
     

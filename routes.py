@@ -164,16 +164,6 @@ def dashboard():
                            email=current_user.email,
                            recent_conversations=recent_conversations)
 
-@main.route('/reports')
-@login_required
-def reports():
-    """Render the reports page."""
-    logger.info(f"Rendering reports page for user: {current_user.username}")
-    
-    return render_template('reports.html', 
-                          username=current_user.username,
-                          email=current_user.email)
-
 @main.route('/api/login', methods=['POST'])
 def api_login():
     """API endpoint for login."""
@@ -1311,7 +1301,6 @@ def generate_report():
         chart_ids = data.get('chart_ids', [])
         title = data.get('title', f"Report {datetime.now().strftime('%Y-%m-%d %H:%M')}")
         description = data.get('description', '')
-        content = data.get('report_content', '')  # Get the report content if provided
         
         if not chart_ids:
             return jsonify({"success": False, "error": "No charts selected"}), 400
@@ -1321,23 +1310,13 @@ def generate_report():
             chart = SavedChart.query.filter_by(id=chart_id).first()
             if not chart or chart.user_id != current_user.id:
                 return jsonify({"success": False, "error": f"Chart {chart_id} not found or not owned by user"}), 404
-        
-        # If no content is provided, generate a simple default content
-        if not content:
-            content = f"# {title}\n\n{description}\n\n"
-            content += "## Selected Charts\n\n"
-            for i, chart_id in enumerate(chart_ids, 1):
-                chart = SavedChart.query.filter_by(id=chart_id).first()
-                if chart:
-                    content += f"- Chart {i}: {chart.chart_title or 'Unnamed Chart'} ({chart.chart_type})\n"
-        
+                
         # Create new report
         report = Report(
             user_id=current_user.id,
             title=title,
             description=description,
-            chart_ids=json.dumps(chart_ids),
-            content=content
+            chart_ids=json.dumps(chart_ids)
         )
         
         db.session.add(report)
@@ -1474,7 +1453,6 @@ def get_report(report_id):
                 "id": report.id,
                 "title": report.title,
                 "description": report.description,
-                "content": report.content,  # Include the report content
                 "created_at": report.created_at.isoformat(),
                 "charts": charts
             }
@@ -1500,21 +1478,7 @@ def download_report(report_id):
         
         if not report:
             return jsonify({"success": False, "error": "Report not found"}), 404
-        
-        # Use saved content when available - prevents JSON parsing errors
-        if report.content and not request.args.get('regenerate', False):
-            content = report.content
-            filename = f"report_{report_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
-            mimetype = 'text/markdown'
             
-            # Create a plain text response with the report content
-            response = make_response(content)
-            response.headers['Content-Disposition'] = f'attachment; filename={filename}'
-            response.headers['Content-Type'] = mimetype
-            
-            return response
-        
-        # Otherwise, generate fresh content
         chart_ids = json.loads(report.chart_ids)
         charts = []
         
@@ -1525,8 +1489,8 @@ def download_report(report_id):
                     "id": chart.id,
                     "chart_type": chart.chart_type,
                     "chart_title": chart.chart_title,
-                    "chart_data": json.loads(chart.chart_data),  # Parse chart data JSON here
-                    "chart_config": json.loads(chart.chart_config) if chart.chart_config else None,
+                    "chart_data": chart.chart_data,
+                    "chart_config": chart.chart_config,
                     "created_at": chart.created_at.isoformat()
                 })
         
@@ -1567,12 +1531,7 @@ def download_report(report_id):
             content = ai_client.generate_report(charts, data_summary)
             filename = f"report_{report_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
             mimetype = 'text/markdown'
-        
-        # Save the newly generated content to the report
-        if content:
-            report.content = content
-            db.session.commit()
-        
+            
         # Create a response with the report content
         response = make_response(content)
         response.headers['Content-Disposition'] = f'attachment; filename={filename}'
