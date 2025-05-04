@@ -38,7 +38,6 @@ def create_app():
     app.config['UPLOAD_FOLDER'] = upload_folder
     
     # Initialize extensions with app
-    logger.info(f"Using database: {app.config['SQLALCHEMY_DATABASE_URI']}")
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = 'main.login'
