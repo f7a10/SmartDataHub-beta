@@ -28,325 +28,285 @@
                 <div class="dropdown-content">
                     <a href="#" id="profileLink"><i class="fas fa-user"></i> Profile</a>
                     <a href="#" id="toggleDarkMode"><i class="fas fa-moon"></i> Dark Mode</a>
-                    <a href="{{ url_for('main.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Main Dashboard Content -->
+    <!-- Main Content -->
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <nav class="sidebar-nav">
-                <ul>
+        <div class="sidebar">
+            <nav>
+                <ul class="sidebar-nav">
                     <li class="active"><a href="#"><i class="fas fa-home"></i> Dashboard</a></li>
                     <li><a href="#" id="savedChartsLink"><i class="fas fa-chart-pie"></i> Saved Charts</a></li>
                     <li><a href="#" id="reportsLink"><i class="fas fa-file-alt"></i> Reports</a></li>
                     <li><a href="#" id="conversationsLink"><i class="fas fa-comments"></i> Conversations</a></li>
-                    <li><a href="{{ url_for('main.help_page') }}"><i class="fas fa-question-circle"></i> Help</a></li>
                 </ul>
             </nav>
-        </aside>
+        </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="content-section upload-section">
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- File Upload Section - Initial View -->
+            <section class="upload-section">
                 <div class="section-header">
-                    <h2>Upload Your Data</h2>
-                    <div class="section-actions">
-                        <button class="btn-new-analysis" id="mainNewAnalysisBtn"><i class="fas fa-plus-circle"></i> New Analysis</button>
-                    </div>
-                    <p>Upload your data files to get started with analysis</p>
-                </div>
-                <div class="upload-container">
-                    <div class="file-upload-area" id="dropZone">
-                        <input type="file" id="fileInput" class="hidden-input" multiple accept=".csv,.xlsx,.xls,.json,.txt">
-                        <div class="upload-icon">
-                            <i class="fas fa-cloud-upload-alt fa-3x"></i>
-                        </div>
-                        <div class="file-label">
-                            <p>Drag & drop files here or <span>browse</span></p>
-                            <div class="file-type-hint">Accepted file types: CSV, Excel, JSON, TXT</div>
-                        </div>
-                    </div>
-                    <div class="file-list" id="fileList"></div>
-                    <button class="btn-analyze" id="analyzeBtn" disabled>
-                        <i class="fas fa-chart-line"></i> Analyze Data
-                    </button>
-                </div>
-            </div>
-
-            <!-- AI Chat box positioned below file upload -->
-            <div class="content-section ai-chat-section" id="aiChatSection">
-                <div class="section-header">
-                    <h2>AI Assistant</h2>
-                    <p>Ask questions about your data and get instant insights</p>
-                </div>
-                <div class="ai-chat-container">
-                    <div class="chat-messages" id="chatMessages">
-                        <!-- Welcome message will be inserted here by JavaScript -->
-                    </div>
-                    <div class="chat-input-container">
-                        <input type="text" id="chatInput" placeholder="Ask a question about your data...">
-                        <button id="sendMessageBtn"><i class="fas fa-paper-plane"></i></button>
-                    </div>
-                    <div class="suggested-prompts" id="suggestedPrompts">
-                        <!-- Suggested prompts will be inserted here by JavaScript -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dashboard Section (Hidden initially) -->
-            <div class="content-section dashboard-analysis-section" id="dashboardSection" style="display: none;">
-                <div class="dashboard-header">
                     <h2>Data Analysis</h2>
-                    <div class="dashboard-actions">
-                        <button class="btn-new-analysis" id="newAnalysisBtn"><i class="fas fa-plus-circle"></i> New Analysis</button>
-                    </div>
-                </div>
-
-                <!-- Data Metrics -->
-                <div class="metrics-grid" id="metricsGrid">
-                    <!-- Metrics will be populated by JavaScript -->
-                </div>
-
-                <!-- Chart Selection -->
-                <div class="chart-selection-header">
-                    <h3>Available Visualizations</h3>
-                    <p>Select charts to visualize your data</p>
-                </div>
-                <div class="chart-selection-grid" id="chartSelectionGrid">
-                    <!-- Chart selection boxes will be populated by JavaScript -->
-                </div>
-
-                <!-- Charts Container -->
-                <div class="selected-charts-container" id="selectedChartsContainer">
-                    <h3>Selected Visualizations</h3>
-                    <div class="charts-grid" id="chartsGrid">
-                        <!-- Selected charts will be displayed here -->
-                    </div>
-                </div>
-
-                <!-- AI Insights Section -->
-                <div class="ai-insights-section" id="aiInsightsSection">
-                    <h3><i class="fas fa-robot"></i> AI Insights</h3>
-                    <div class="ai-insights-content" id="aiInsightsContent">
-                        <!-- AI insights will be populated by JavaScript -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Saved Charts Section (Hidden initially) -->
-            <div class="content-section saved-charts-section" id="savedChartsSection" style="display: none;">
-                <div class="section-header">
-                    <h2>Saved Charts</h2>
-                    <p>View and manage your saved visualizations</p>
-                </div>
-                <div class="saved-charts-grid" id="savedChartsGrid">
-                    <!-- Saved charts will be populated by JavaScript -->
-                </div>
-            </div>
-
-            <!-- Reports Section (Hidden initially) -->
-            <div class="content-section reports-section" id="reportsSection" style="display: none;">
-                <div class="section-header">
-                    <h2>Reports</h2>
-                    <p>Create comprehensive reports from your data and visualizations</p>
-                </div>
-                
-                <!-- Existing Reports List -->
-                <div class="reports-tabs">
-                    <button class="reports-tab-btn active" data-tab="existing-reports">My Reports</button>
-                    <button class="reports-tab-btn" data-tab="create-report">Create New Report</button>
-                </div>
-                
-                <div class="reports-tab-content active" id="existing-reports-tab">
-                    <div class="reports-list" id="reportsList">
-                        <!-- Reports will be populated by JavaScript -->
+                    <div class="section-controls">
+                        <button id="mainNewAnalysisBtn" class="btn-secondary"><i class="fas fa-plus"></i> New Analysis</button>
                     </div>
                 </div>
                 
-                <!-- Create New Report Tab -->
-                <div class="reports-tab-content" id="create-report-tab">
-                    <div class="create-report-container">
-                        <div class="report-creation-steps">
-                            <div class="report-step active" id="step-1">
-                                <div class="step-number">1</div>
-                                <div class="step-label">Select Files</div>
-                            </div>
-                            <div class="report-step" id="step-2">
-                                <div class="step-number">2</div>
-                                <div class="step-label">Choose Charts</div>
-                            </div>
-                            <div class="report-step" id="step-3">
-                                <div class="step-number">3</div>
-                                <div class="step-label">Define Report</div>
-                            </div>
-                            <div class="report-step" id="step-4">
-                                <div class="step-number">4</div>
-                                <div class="step-label">AI Assistance</div>
+                <div class="upload-container">
+                    <div class="drop-zone" id="dropZone">
+                        <div class="drop-zone-content">
+                            <i class="fas fa-file-upload"></i>
+                            <h3>Upload Data Files</h3>
+                            <p>Drag & drop files here or click to browse</p>
+                            <input type="file" id="fileInput" multiple accept=".csv,.xlsx,.xls,.json,.txt" class="file-input">
+                            <button class="browse-btn">Browse Files</button>
+                        </div>
+                    </div>
+                    
+                    <div class="upload-options">
+                        <div class="file-list-container">
+                            <h3>Selected Files</h3>
+                            <div id="fileList" class="file-list">
+                                <div class="empty-state">No files selected</div>
                             </div>
                         </div>
                         
-                        <div class="report-creation-content">
-                            <!-- Step 1: Select Files -->
-                            <div class="report-step-content active" id="step-1-content">
-                                <h3>Select Data Files for Report</h3>
-                                <p>Choose the files you want to include in your report analysis</p>
-                                
-                                <!-- File Upload Section -->
-                                <div class="report-file-upload">
-                                    <div class="upload-area" id="reportUploadArea">
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                        <h4>Drag & Drop Files Here</h4>
-                                        <p>or</p>
-                                        <label class="upload-btn" for="reportFileInput">
-                                            Browse Files
-                                            <input type="file" id="reportFileInput" multiple accept=".csv,.xlsx,.xls,.json,.txt" style="display: none;">
-                                        </label>
-                                        <p class="file-types">Supported files: CSV, Excel, JSON, TXT</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="report-file-selection" id="reportFileSelection">
-                                    <!-- Available files will be populated by JavaScript -->
-                                </div>
-                                <div class="report-step-actions">
-                                    <button class="btn-next-step" data-next="step-2">Next: Choose Charts</button>
-                                </div>
-                            </div>
-                            
-                            <!-- Step 2: Choose Charts -->
-                            <div class="report-step-content" id="step-2-content">
-                                <h3>Select Visualizations</h3>
-                                <p>Choose the charts you want to include in your report</p>
-                                <div class="report-charts-selection" id="reportChartSelection">
-                                    <div class="report-charts-grid" id="availableChartsGrid">
-                                        <!-- Available charts will be populated here -->
-                                    </div>
-                                    <div class="report-charts-preview" id="selectedChartsPreview">
-                                        <h4>Selected Charts</h4>
-                                        <div class="selected-charts-grid" id="selectedChartsGrid">
-                                            <!-- Selected charts will be shown here -->
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="report-step-actions">
-                                    <button class="btn-prev-step" data-prev="step-1">Back</button>
-                                    <button class="btn-next-step" data-next="step-3">Next: Define Report</button>
-                                </div>
-                            </div>
-                            
-                            <!-- Step 3: Define Report -->
-                            <div class="report-step-content" id="step-3-content">
-                                <h3>Define Your Report</h3>
-                                <p>Enter the details for your report</p>
-                                <form id="reportDetailsForm">
-                                    <div class="form-group">
-                                        <label for="reportTitle">Report Title</label>
-                                        <input type="text" id="reportTitle" required placeholder="Enter a descriptive title for your report">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="reportDescription">Description</label>
-                                        <textarea id="reportDescription" placeholder="Describe what this report is about and its purpose"></textarea>
-                                    </div>
-
-                                </form>
-                                <div class="report-step-actions">
-                                    <button class="btn-prev-step" data-prev="step-2">Back</button>
-                                    <button class="btn-next-step" data-next="step-4">Next: AI Assistance</button>
-                                </div>
-                            </div>
-                            
-                            <!-- Step 4: AI Assistance -->
-                            <div class="report-step-content" id="step-4-content">
-                                <h3>AI-Assisted Report Creation</h3>
-                                <p>Tell our AI assistant what you'd like to include in your report</p>
-                                
-                                <div class="report-ai-interaction">
-                                    <div class="report-ai-chat" id="reportAiChat">
-                                        <!-- AI chat messages will appear here -->
-                                    </div>
-                                    <div class="report-ai-input-container">
-                                        <textarea id="reportAiInput" placeholder="Describe what you want in your report... (e.g., 'Include a summary of key trends in the data', 'Focus on correlations between variables', etc.)"></textarea>
-                                        <button id="sendReportAiRequest" class="btn-send-ai-request">
-                                            <i class="fas fa-paper-plane"></i> Generate with AI
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <div class="report-ai-suggestions">
-                                    <h4>Suggested Prompts</h4>
-                                    <div class="report-ai-suggestion-pills">
-                                        <span class="ai-suggestion-pill" data-prompt="Create an executive summary of the key insights from my data">Executive Summary</span>
-                                        <span class="ai-suggestion-pill" data-prompt="Identify the top trends in my data and explain their significance">Trend Analysis</span>
-                                        <span class="ai-suggestion-pill" data-prompt="Find correlations between variables and explain what they mean">Correlation Analysis</span>
-                                        <span class="ai-suggestion-pill" data-prompt="Provide recommendations based on the data findings">Recommendations</span>
-                                        <span class="ai-suggestion-pill" data-prompt="Create a detailed analysis focusing on outliers and anomalies">Anomaly Detection</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="report-preview" id="reportPreviewSection">
-                                    <h4>Report Preview</h4>
-                                    <div class="report-preview-content" id="reportPreviewContent">
-                                        <!-- Generated report preview will appear here -->
-                                    </div>
-                                </div>
-                                
-                                <div class="report-step-actions">
-                                    <button class="btn-prev-step" data-prev="step-3">Back</button>
-                                    <button class="btn-save-report" id="saveGeneratedReport">Save Report</button>
-                                </div>
-                            </div>
+                        <div class="analyze-container">
+                            <button id="analyzeBtn" class="btn-primary" disabled>Analyze Data</button>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Conversations Section (Hidden initially) -->
-            <div class="content-section conversations-section" id="conversationsSection" style="display: none;">
+            </section>
+            
+            <!-- Analysis Dashboard - Results View -->
+            <section id="dashboardSection" class="dashboard-section" style="display: none;">
                 <div class="section-header">
-                    <h2>AI Conversations</h2>
-                    <p>View your previous conversations with the AI assistant</p>
+                    <h2>Data Analysis</h2>
+                    <div class="section-controls">
+                        <button id="newAnalysisBtn" class="btn-secondary"><i class="fas fa-plus"></i> New Analysis</button>
+                    </div>
                 </div>
-                <div class="conversations-list" id="conversationsList">
-                    <!-- Conversations will be populated by JavaScript -->
+                
+                <!-- Metrics Display -->
+                <div class="metrics-section">
+                    <h3>Key Metrics</h3>
+                    <div id="metricsGrid" class="metrics-grid"></div>
                 </div>
+                
+                <!-- AI Insights -->
+                <div class="insights-section">
+                    <h3>AI Insights</h3>
+                    <div id="aiInsightsContent" class="insights-content">
+                        <div class="empty-state">Upload and analyze data to see AI insights</div>
+                    </div>
+                </div>
+                
+                <!-- Visualizations -->
+                <div class="visualizations-section">
+                    <div class="section-header">
+                        <h3>Available Visualizations</h3>
+                        <button id="exportReportBtn" class="btn-outline"><i class="fas fa-file-export"></i> Create Report</button>
+                    </div>
+                    <div id="visualizationsGrid" class="visualizations-grid">
+                        <!-- Chart placeholders will be dynamically added here -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Saved Charts Section -->
+            <section id="savedChartsSection" class="saved-charts-section" style="display: none;">
+                <div class="section-header">
+                    <h2>Saved Charts</h2>
+                </div>
+                <div id="savedChartsGrid" class="saved-charts-grid">
+                    <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading charts...</div>
+                </div>
+            </section>
+            
+            <!-- Reports Section -->
+            <section id="reportsSection" class="reports-section" style="display: none;">
+                <div class="section-header">
+                    <h2>Reports</h2>
+                    <div class="section-controls">
+                        <button id="createReportBtn" class="btn-primary"><i class="fas fa-plus"></i> Create Report</button>
+                    </div>
+                </div>
+                <div id="reportsGrid" class="reports-grid">
+                    <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading reports...</div>
+                </div>
+            </section>
+            
+            <!-- Conversations Section -->
+            <section id="conversationsSection" class="conversations-section" style="display: none;">
+                <div class="section-header">
+                    <h2>Saved Conversations</h2>
+                </div>
+                <div id="conversationsGrid" class="conversations-grid">
+                    <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading conversations...</div>
+                </div>
+            </section>
+        </div>
+        
+        <!-- AI Chat Panel - Only visible on dashboard page -->
+        <div id="aiChatSection" class="ai-chat-section">
+            <div class="ai-chat-header">
+                <h3>AI Assistant</h3>
+                <button id="toggleAiChat" class="toggle-chat-btn"><i class="fas fa-chevron-down"></i></button>
             </div>
-        </main>
-    </div>
-
-    <!-- Report Generation Modal -->
-    <div class="modal" id="reportModal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2>Generate Report</h2>
-            <div class="report-preview" id="reportPreview">
-                <!-- Report preview will be populated by JavaScript -->
-            </div>
-            <div class="modal-actions">
-                <button class="btn-cancel">Cancel</button>
-                <button class="btn-download" id="downloadReportBtn">Download Report</button>
+            <div class="ai-chat-body">
+                <div id="chatMessages" class="chat-messages">
+                    <!-- Messages will appear here -->
+                </div>
+                <div class="chat-input">
+                    <textarea id="userMessageInput" placeholder="Ask a question about your data..."></textarea>
+                    <button id="sendMessageBtn"><i class="fas fa-paper-plane"></i></button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Chart Detail Modal -->
-    <div class="modal" id="chartDetailModal">
+    <!-- Modal for creating a report -->
+    <div id="createReportModal" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
-            <h2 id="chartDetailTitle">Chart Details</h2>
-            <div class="chart-detail-container" id="chartDetailContainer">
-                <!-- Chart details will be populated by JavaScript -->
-            </div>
-            <div class="modal-actions">
-                <button class="btn-save-chart" id="saveChartBtn">Save Chart</button>
-                <button class="btn-close">Close</button>
+            <h2>Create Report</h2>
+            <div id="createReportSteps">
+                <!-- Step 1: Select files -->
+                <div class="report-step active" data-step="1">
+                    <h3>Step 1: Select Files</h3>
+                    <div id="reportFileSelection" class="report-file-selection">
+                        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading files...</div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-primary next-step">Next</button>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Select charts -->
+                <div class="report-step" data-step="2">
+                    <h3>Step 2: Select Charts</h3>
+                    <div id="reportChartSelection" class="report-chart-selection">
+                        <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading charts...</div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-secondary prev-step">Previous</button>
+                        <button class="btn-primary next-step">Next</button>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Report details -->
+                <div class="report-step" data-step="3">
+                    <h3>Step 3: Report Details</h3>
+                    <div class="report-details-form">
+                        <div class="form-group">
+                            <label for="reportTitle">Report Title</label>
+                            <input type="text" id="reportTitle" placeholder="Enter report title">
+                        </div>
+                        <div class="form-group">
+                            <label for="reportDescription">Description</label>
+                            <textarea id="reportDescription" placeholder="Enter report description"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-secondary prev-step">Previous</button>
+                        <button class="btn-primary next-step">Next</button>
+                    </div>
+                </div>
+                
+                <!-- Step 4: AI assistance -->
+                <div class="report-step" data-step="4">
+                    <h3>Step 4: Generate with AI</h3>
+                    <div class="report-ai-assistance">
+                        <div class="form-group">
+                            <label for="reportAiPrompt">What insights would you like to highlight?</label>
+                            <textarea id="reportAiPrompt" placeholder="E.g., Summarize trends in my sales data, focusing on seasonal patterns"></textarea>
+                        </div>
+                        <div class="ai-options">
+                            <div class="form-check">
+                                <input type="checkbox" id="includeExecutiveSummary" checked>
+                                <label for="includeExecutiveSummary">Include Executive Summary</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" id="includeRecommendations" checked>
+                                <label for="includeRecommendations">Include Recommendations</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-secondary prev-step">Previous</button>
+                        <button class="btn-primary" id="generateReportBtn">Generate Report</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     
+    <!-- Modal for exporting a report -->
+    <div id="exportReportModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Export Report</h2>
+            <div class="export-form">
+                <div class="form-group">
+                    <label for="exportReportTitle">Report Title</label>
+                    <input type="text" id="exportReportTitle" placeholder="Enter report title">
+                </div>
+                <div class="form-group">
+                    <label for="exportReportFormat">Format</label>
+                    <select id="exportReportFormat">
+                        <option value="pdf">PDF</option>
+                        <option value="markdown">Markdown</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="cancelExportBtn">Cancel</button>
+                <button class="btn-primary" id="downloadReportBtn">Download</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for viewing a report -->
+    <div id="viewReportModal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close-modal">&times;</span>
+            <h2 id="viewReportTitle">Report Title</h2>
+            <div class="report-view-container">
+                <div id="reportContent" class="report-content">
+                    <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading report...</div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="closeReportBtn">Close</button>
+                <button class="btn-primary" id="downloadViewedReportBtn">Download</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Report preview Modal -->
+    <div id="reportPreviewModal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close-modal">&times;</span>
+            <h2>Report Preview</h2>
+            <div class="report-preview-container">
+                <div id="reportPreviewContent" class="report-preview-content">
+                    <!-- Report preview content will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="closePreviewBtn">Close</button>
+                <button class="btn-primary" id="saveReportBtn">Save Report</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Profile Modal -->
     <div class="modal" id="profileModal">
         <div class="modal-content">
@@ -375,7 +335,7 @@
 
     <!-- Scripts with cache busting parameters -->
     <script src="{{ url_for('static', filename='js/charts.js') }}?v={{ range(1000, 9999) | random }}"></script>
-    <script src="{{ url_for('static', filename='js/dashboard.js') }}?v={{ range(1000, 9999) | random }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard_updated.js') }}"></script>
     <script src="{{ url_for('static', filename='js/ai_chat.js') }}?v={{ range(1000, 9999) | random }}"></script>
     <script src="{{ url_for('static', filename='js/reports_new.js') }}?v={{ range(1000, 9999) | random }}"></script>
 </body>
