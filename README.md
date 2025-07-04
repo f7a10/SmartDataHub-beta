@@ -7,6 +7,9 @@ SmartDataHub is an innovative platform designed to empower individuals and small
 Key Features
 
 •
+User Data Storage: SmartDataHub utilizes a local PostgreSQL database to securely store user data, chat histories, and generated graphs, ensuring data persistence and integrity.
+
+•
 AI-Powered Data Analysis: Simply upload your Excel files, and SmartDataHub will automatically display your data as beautiful, interactive graphs. Our advanced AI engine provides intelligent insights and recommendations based on your data.
 
 •
@@ -24,6 +27,7 @@ User-Friendly Interface: Designed for ease of use, SmartDataHub makes complex da
 Target Audience
 
 SmartDataHub is ideal for individuals and small businesses who require robust data analysis but may not have the resources to hire dedicated data analysis teams. Our platform democratizes data science, putting powerful tools directly into your hands.
+
 
 Screenshots
 
