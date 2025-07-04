@@ -25,10 +25,6 @@ Target Audience
 
 SmartDataHub is ideal for individuals and small businesses who require robust data analysis but may not have the resources to hire dedicated data analysis teams. Our platform democratizes data science, putting powerful tools directly into your hands.
 
-Getting Started
-
-(Further instructions on how to get started will be added here, including installation, usage, and examples.)
-
 Screenshots
 
 Home Page
