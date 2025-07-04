@@ -1,4 +1,4 @@
-SmartDataHub
+**SmartDataHub**
 
 Unlock the Power of Your Data with AI
 
