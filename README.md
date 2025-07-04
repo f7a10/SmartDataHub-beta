@@ -27,7 +27,8 @@ User-Friendly Interface: Designed for ease of use, SmartDataHub makes complex da
 Target Audience
 
 SmartDataHub is ideal for individuals and small businesses who require robust data analysis but may not have the resources to hire dedicated data analysis teams. Our platform democratizes data science, putting powerful tools directly into your hands.
-
+ 
+ Link: https://smart-data-hub-3-smartdatahub3.replit.app
 
 Screenshots
 
